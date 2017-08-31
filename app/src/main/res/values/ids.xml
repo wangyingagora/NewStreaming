@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <item name="small_video_view_dock" type="id" />
+    <item name="full_screen_container" type="id" />
+    <item name="customized_function_id" type="id" />
+    <item name="rgbss" type="id" />
+    <item name="btn_transcoding" type="id" />
+    <item name="btn_none_transcoding" type="id" />
+    <item name="btn_transcode_cancel" type="id" />
+    <item name="btn_none_trancode_ok" type="id" />
+    <item name="btn_trancode_ok" type="id" />
+    <item name="edit_transcode" type="id" />
+    <item name="edit_none_transcode" type="id" />
+    <item name="btn_none_transcode_cancel" type="id" />
+    <item name="media_type" type="id" />
+    <item name="video_type" type="id" />
+    <item name="stream_type" type="id" />
+    <item name="media_type_av" type="id" />
+    <item name="media_type_audio" type="id" />
+    <item name="media_type_video" type="id" />
+    <item name="media_type_none" type="id" />
+    <item name="video_type_hidden" type="id" />
+    <item name="video_type_fit" type="id" />
+    <item name="video_type_adaptive" type="id" />
+    <item name="stream_type_high" type="id" />
+    <item name="stream_type_low" type="id" />
+    <item name="set_media_av" type="id" />
+    <item name="set_media_none" type="id" />
+    <item name="set_media_a" type="id" />
+    <item name="set_media_v" type="id" />
+    <item name="set_media_type" type="id" />
+    <item name="transcdde_layout" type="id" />
+    <item name="transcode_default" type="id" />
+    <item name="transcode_float" type="id" />
+    <item name="transcode_title" type="id" />
+    <item name="transcode_martix" type="id" />
+    <item name="codec" type="id" />
+    <item name="codec_baseline" type="id" />
+    <item name="codec_main" type="id" />
+    <item name="codec_high" type="id" />
+    <item name="samplerate_32" type="id" />
+    <item name="samplerate_44_1" type="id" />
+    <item name="samplerate_48" type="id" />
+    <item name="samplerate" type="id" />
+</resources>

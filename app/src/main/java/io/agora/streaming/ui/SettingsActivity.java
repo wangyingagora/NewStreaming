@@ -1,0 +1,131 @@
+package io.agora.streaming.ui;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import io.agora.streaming.R;
+import io.agora.streaming.model.ConstantApp;
+
+public class SettingsActivity extends AppCompatActivity {
+    private VideoProfileAdapter mVideoProfileAdapter;
+    private String GET_WIDTH_VAULE = "get width";
+    private String GET_HEIGHT_VAULE = "get height";
+    private String GET_BITRATE_VAULE ="get bitrate";
+    private int mRetCode = 101;
+    private Intent mIntent;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings);
+        initUi();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+    }
+
+    private void initUi() {
+        RecyclerView v_profiles = (RecyclerView) findViewById(R.id.profiles);
+        v_profiles.setHasFixedSize(true);
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        int prefIndex = pref.getInt(ConstantApp.PrefManager.PREF_PROPERTY_PROFILE_IDX, ConstantApp.DEFAULT_PROFILE_IDX);
+
+        mVideoProfileAdapter = new VideoProfileAdapter(this, prefIndex);
+        mVideoProfileAdapter.setHasStableIds(true);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        v_profiles.setLayoutManager(layoutManager);
+        v_profiles.setAdapter(mVideoProfileAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_settings, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.confirm:
+                doSaveProfile();
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    private void doSaveProfile() {
+        int width = 0;
+        int height = 0;
+        int bitrate = 0;
+        int profileIndex = mVideoProfileAdapter.getSelected();
+        Log.e("adam", " profileIndex is " + profileIndex);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putInt(ConstantApp.PrefManager.PREF_PROPERTY_PROFILE_IDX, profileIndex);
+        editor.apply();
+
+        switch (profileIndex){
+            case 0:
+                width = 160;
+                height = 120;
+                bitrate = 80;
+                break;
+            case 1:
+                width = 320;
+                height = 180;
+                bitrate = 160;
+                break;
+            case 2:
+                width = 320;
+                height = 240;
+                bitrate = 200;
+                break;
+            case 3:
+                width = 640;
+                height = 360;
+                bitrate = 400;
+                break;
+            case 4:
+                width = 640;
+                height = 480;
+                bitrate = 500;
+                break;
+            case 5:
+                width = 1280;
+                height = 720;
+                bitrate = 1000;
+                break;
+            case 6:
+                width = 360;
+                height = 640;
+                bitrate = 400;
+                break;
+            default:
+                break;
+        }
+
+        mIntent = new Intent();
+        mIntent.putExtra(GET_WIDTH_VAULE, width);
+        mIntent.putExtra(GET_HEIGHT_VAULE, height);
+        mIntent.putExtra(GET_BITRATE_VAULE, bitrate);
+        this.setResult(mRetCode, mIntent);
+    }
+}

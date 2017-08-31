@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:textSize="10sp"
+            android:textColor="@android:color/black"
+            android:text="712846912033491287"/>
+
+        <CheckBox
+            android:id="@+id/cb_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="20dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:textColor="@android:color/black"
+            android:text="subscribe" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioGroup
+            android:id="@id/media_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@id/media_type_av"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:text="AV" />
+
+            <RadioButton
+                android:id="@id/media_type_audio"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:text="Audio" />
+
+            <RadioButton
+                android:id="@id/media_type_video"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:text="Video" />
+
+            <RadioButton
+                android:id="@id/media_type_none"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:layout_weight="1"
+                android:text="None" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#000000"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioGroup
+            android:id="@id/video_type"
+            android:textColor="@android:color/black"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@id/video_type_hidden"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@android:color/black"
+            android:text="Hidden" />
+
+        <RadioButton
+            android:id="@id/video_type_fit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Fit" />
+
+        <RadioButton
+            android:id="@id/video_type_adaptive"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@android:color/black"
+            android:text="Adaptive" />
+
+        </RadioGroup>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#000000"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioGroup
+            android:id="@id/stream_type"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@id/stream_type_high"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:text="High" />
+
+            <RadioButton
+                android:id="@id/stream_type_low"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:text="Low" />
+        </RadioGroup>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="#827438"/>
+
+
+</LinearLayout>

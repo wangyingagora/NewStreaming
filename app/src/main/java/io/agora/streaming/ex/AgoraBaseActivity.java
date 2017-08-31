@@ -1,0 +1,112 @@
+package io.agora.streaming.ex;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.widget.Toast;
+
+import java.util.Arrays;
+
+import io.agora.streaming.model.ConstantApp;
+
+/**
+ * Created by eaglewangy on 31/08/2017.
+ */
+
+public class AgoraBaseActivity extends AppCompatActivity {
+    private static final String TAG = AgoraBaseActivity.class.getSimpleName();
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isFinishing()) {
+                    return;
+                }
+
+                boolean checkPermissionResult = checkSelfPermissions();
+
+                if ((Build.VERSION.SDK_INT < Build.VERSION_CODES.M)) {
+                    // so far we do not use OnRequestPermissionsResultCallback
+                }
+            }
+        }, 500);
+    }
+
+    private boolean checkSelfPermissions() {
+        return checkSelfPermission(Manifest.permission.RECORD_AUDIO, ConstantApp.PERMISSION_REQ_ID_RECORD_AUDIO) &&
+                checkSelfPermission(Manifest.permission.CAMERA, ConstantApp.PERMISSION_REQ_ID_CAMERA) &&
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, ConstantApp.PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE);
+    }
+    protected <T> T findViewForId(@IdRes int resId) {
+        return (T)findViewById(resId);
+    }
+
+    protected void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    public boolean checkSelfPermission(String permission, int requestCode) {
+        Log.d(TAG, "checkSelfPermission " + permission + " " + requestCode);
+        if (ContextCompat.checkSelfPermission(this,
+                permission)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{permission},
+                    requestCode);
+            return false;
+        }
+
+        if (Manifest.permission.CAMERA.equals(permission)) {
+            //((AGApplication) getApplication()).initWorkerThread();
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult " + requestCode + " " + Arrays.toString(permissions) + " " + Arrays.toString(grantResults));
+        switch (requestCode) {
+            case ConstantApp.PERMISSION_REQ_ID_RECORD_AUDIO: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    checkSelfPermission(Manifest.permission.CAMERA, ConstantApp.PERMISSION_REQ_ID_CAMERA);
+                } else {
+                    finish();
+                }
+                break;
+            }
+            case ConstantApp.PERMISSION_REQ_ID_CAMERA: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, ConstantApp.PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE);
+                    //((AGApplication) getApplication()).initWorkerThread();
+                } else {
+                    finish();
+                }
+                break;
+            }
+            case ConstantApp.PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                } else {
+                    finish();
+                }
+                break;
+            }
+        }
+    }
+}
