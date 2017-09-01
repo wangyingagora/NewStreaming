@@ -38,18 +38,20 @@ import io.agora.streaming.model.ConstantApp;
 
 public class ChannelActivity extends AgoraBaseActivity {
     private final static String TAG = ChannelActivity.class.getSimpleName();
-    private LiveEngine mLiveEngin;
+    private LiveEngine mLiveEngine;
     private LivePublisher mLivePublisher;
     private LiveSubscriber mSubscriber;
     private int mMyselfId = 0;
 
-    private Map<Integer, UserInfo> mUserInfo = new ConcurrentHashMap<>();
+    private Map<Integer, UserInfo> mUserInfo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_channel_ex);
+
+        mUserInfo = new HashMap<>();
 
         Intent intent = getIntent();
 
@@ -64,11 +66,10 @@ public class ChannelActivity extends AgoraBaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mLiveEngin.leaveChannel();
     }
 
     private void initEngine(String channelName, boolean enableVideo) {
-        mLiveEngin = LiveEngine.createLiveEngine(this, getString(R.string.agora_app_id), new LiveEngineHandler() {
+        mLiveEngine = LiveEngine.createLiveEngine(this, getString(R.string.agora_app_id), new LiveEngineHandler() {
             @Override
             public void onWarning(int warningCode) {
                 Log.e(TAG, "onWarning: " + warningCode);
@@ -80,14 +81,14 @@ public class ChannelActivity extends AgoraBaseActivity {
             }
 
             @Override
-            public void onJoinChannel(String channel, int uid, int elapsed) {
+            public void onJoinChannel(String channel, final int uid, int elapsed) {
                 Log.e(TAG, "onJoinChannel: channel: " + channel + ", uid: " + uid);
 
-                mMyselfId = uid;
+                //mMyselfId = uid;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        createViewableUser(mMyselfId, true);
+                        createViewableUser(uid, true);
                     }
                 });
             }
@@ -128,7 +129,7 @@ public class ChannelActivity extends AgoraBaseActivity {
             }
         });
 
-        mLivePublisher = new LivePublisher(mLiveEngin, new LivePublisherHandler() {
+        mLivePublisher = new LivePublisher(mLiveEngine, new LivePublisherHandler() {
             @Override
             public void onPublishSuccess(String url) {
                 Log.e(TAG, "onPublishSuccess: " + url);
@@ -152,9 +153,9 @@ public class ChannelActivity extends AgoraBaseActivity {
 
         LiveChannelConfig config = new LiveChannelConfig();
         config.videoEnabled = enableVideo;
-        int result = mLiveEngin.joinChannel(channelName, null, config, mMyselfId);
+        int result = mLiveEngine.joinChannel(channelName, null, config, mMyselfId);
 
-        mSubscriber = new LiveSubscriber(mLiveEngin, new LiveSubscriberHandler() {
+        mSubscriber = new LiveSubscriber(mLiveEngine, new LiveSubscriberHandler() {
             @Override
             public void publishedByHostUid(int uid, int streamType) {
                 Log.e(TAG, "publishedByHostUid: " + uid + ", streamType: " + streamType);
@@ -191,6 +192,14 @@ public class ChannelActivity extends AgoraBaseActivity {
                 doPublish((ImageView) v);
             }
         });
+
+        ImageView endCallView = findViewForId(R.id.end_call);
+        endCallView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                endCall();
+            }
+        });
     }
 
     private void doPublish(ImageView view) {
@@ -200,24 +209,39 @@ public class ChannelActivity extends AgoraBaseActivity {
             return;
         }
 
-        boolean isPublish = !(boolean)view.getTag();
-        view.setTag(isPublish);
-        view.setColorFilter(ContextCompat.getColor(this, R.color.agora_blue), PorterDuff.Mode.MULTIPLY);
+        boolean isPublish = (boolean)view.getTag();
 
-        if (isPublish) {
+        if (!isPublish) {
+            view.setTag(true);
+            view.setColorFilter(ContextCompat.getColor(this, R.color.agora_blue), PorterDuff.Mode.MULTIPLY);
+
             RelativeLayout containerView = findViewForId(R.id.container);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT);
             user.view.setLayoutParams(params);
             containerView.addView(user.view);
-            mLiveEngin.startPreview(user.view, Constants.RENDER_MODE_HIDDEN);
+            mLiveEngine.startPreview(user.view, Constants.RENDER_MODE_HIDDEN);
             mLivePublisher.publishWithPermissionKey("");
         } else {
             view.setTag(false);
             view.clearColorFilter();
             mLivePublisher.unpublish();
-            mLiveEngin.stopPreview();
+            mLiveEngine.stopPreview();
+            RelativeLayout containerView = findViewForId(R.id.container);
+            containerView.removeAllViews();
         }
+    }
+
+    private void endCall() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mLiveEngine.leaveChannel();
+            }
+        });
+
+        //mUserInfo.clear();
+        finish();
     }
 
     private UserInfo getLocalUser() {
@@ -235,17 +259,40 @@ public class ChannelActivity extends AgoraBaseActivity {
         return user;
     }
 
+    private boolean removeUser(int uid) {
+        Iterator iterator = mUserInfo.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry entry = (Map.Entry) iterator.next();
+            Integer id = (Integer)entry.getKey();
+            if (id.intValue() == uid) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
     private UserInfo createViewableUser(int uid, boolean isLocal) {
         if (uid == 0) {
             Log.e(TAG, "uid is 0, invalid user");
             return null;
         }
 
-        SurfaceView surfaceView = RtcEngine.CreateRendererView(getApplicationContext());
+        if (isLocal) {
+            mMyselfId = uid;
+        }
+        UserInfo user = getLocalUser();
+        if (user != null) {
+            user.uid = uid;
+            mUserInfo.put(uid, user);
+            return user;
+        }
+
+        SurfaceView surfaceView = RtcEngine.CreateRendererView(this);
         surfaceView.setZOrderOnTop(false);
         surfaceView.setZOrderMediaOverlay(false);
 
-        UserInfo user = new UserInfo();
+        user = new UserInfo();
         user.uid = uid;
         user.isLocal = isLocal;
         user.view = surfaceView;
