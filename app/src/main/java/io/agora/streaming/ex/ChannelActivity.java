@@ -1,8 +1,10 @@
 package io.agora.streaming.ex;
 
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -200,16 +202,21 @@ public class ChannelActivity extends AgoraBaseActivity {
 
         boolean isPublish = !(boolean)view.getTag();
         view.setTag(isPublish);
+        view.setColorFilter(ContextCompat.getColor(this, R.color.agora_blue), PorterDuff.Mode.MULTIPLY);
+
         if (isPublish) {
             RelativeLayout containerView = findViewForId(R.id.container);
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT);
-            containerView.addView(user.view, 0, params);
-            mLiveEngin.getRtcEngine().setVideoProfile(Constants.VIDEO_PROFILE_360P_4, false);
+            user.view.setLayoutParams(params);
+            containerView.addView(user.view);
             mLiveEngin.startPreview(user.view, Constants.RENDER_MODE_HIDDEN);
             mLivePublisher.publishWithPermissionKey("");
         } else {
-
+            view.setTag(false);
+            view.clearColorFilter();
+            mLivePublisher.unpublish();
+            mLiveEngin.stopPreview();
         }
     }
 
