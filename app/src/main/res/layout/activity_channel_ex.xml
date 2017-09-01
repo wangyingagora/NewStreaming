@@ -5,10 +5,35 @@
     android:orientation="vertical"
     android:background="@android:color/white">
     <RelativeLayout
-        android:id="@+id/container"
+        android:id="@+id/container_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+        <LinearLayout
+            android:id="@+id/inner_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/outer_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <RelativeLayout
+                android:id="@+id/top_layout"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+            </RelativeLayout>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/video_view_list"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+            </android.support.v7.widget.RecyclerView>
+        </LinearLayout>
 
     </RelativeLayout>
     <LinearLayout

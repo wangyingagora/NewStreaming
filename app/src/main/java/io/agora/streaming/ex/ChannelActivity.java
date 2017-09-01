@@ -6,11 +6,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -44,6 +46,12 @@ public class ChannelActivity extends AgoraBaseActivity {
     private int mMyselfId = 0;
 
     private Map<Integer, UserInfo> mUserInfo;
+
+    private RelativeLayout mContainerLayout;
+    private LinearLayout mInnerLayout;
+    private LinearLayout mOuterLayout;
+    private RelativeLayout mOuterTopLayout;
+    private RecyclerView mVideoListView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -184,6 +192,12 @@ public class ChannelActivity extends AgoraBaseActivity {
     }
 
     private void initView() {
+        mContainerLayout = findViewForId(R.id.container_layout);
+        mInnerLayout = findViewForId(R.id.inner_container);
+        mOuterLayout = findViewForId(R.id.outer_container);
+        mOuterTopLayout = findViewForId(R.id.top_layout);
+        mVideoListView = findViewForId(R.id.video_view_list);
+
         ImageView publishImageView = findViewForId(R.id.publish);
         publishImageView.setTag(false);
         publishImageView.setOnClickListener(new View.OnClickListener() {
@@ -215,11 +229,10 @@ public class ChannelActivity extends AgoraBaseActivity {
             view.setTag(true);
             view.setColorFilter(ContextCompat.getColor(this, R.color.agora_blue), PorterDuff.Mode.MULTIPLY);
 
-            RelativeLayout containerView = findViewForId(R.id.container);
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-                    RelativeLayout.LayoutParams.MATCH_PARENT);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
             user.view.setLayoutParams(params);
-            containerView.addView(user.view);
+            mInnerLayout.addView(user.view);
             mLiveEngine.startPreview(user.view, Constants.RENDER_MODE_HIDDEN);
             mLivePublisher.publishWithPermissionKey("");
         } else {
@@ -227,8 +240,9 @@ public class ChannelActivity extends AgoraBaseActivity {
             view.clearColorFilter();
             mLivePublisher.unpublish();
             mLiveEngine.stopPreview();
-            RelativeLayout containerView = findViewForId(R.id.container);
-            containerView.removeAllViews();
+            //RelativeLayout containerView = findViewForId(R.id.container);
+            //containerView.removeAllViews();
+            mInnerLayout.removeAllViews();
         }
     }
 
