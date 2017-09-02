@@ -5,5 +5,5 @@
 
     <dimen name="video_indicator_bottom_margin">20dp</dimen>
 
-    <dimen name="transcoding_setting_width">44dp</dimen>
+    <dimen name="transcoding_setting_width">48dp</dimen>
 </resources>

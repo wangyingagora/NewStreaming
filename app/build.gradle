@@ -9,11 +9,11 @@ android {
     buildToolsVersion "25.0.2"
 
     defaultConfig {
-        applicationId "io.agora.streaming"
+        applicationId "io.agora.streaming.ex"
         minSdkVersion 14 // ICE_CREAM_SANDWICH
         targetSdkVersion 25
         versionCode 18
-        versionName "x.y.z"
+        versionName "1.0.1"
 
         jackOptions {
             enabled false

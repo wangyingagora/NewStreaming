@@ -14,13 +14,18 @@
 
     <string-array
         name="string_array_resolutions">
+        <item>120x160</item> // 120P
+        <item>180x320</item> // 180P
+        <item>240x320</item> // 240P
+        <item>360x640</item> // 360P
+        <item>480x640</item> // 480P
+        <item>720x1280</item> // 720P
         <item>160x120</item> // 120P
         <item>320x180</item> // 180P
         <item>320x240</item> // 240P the default one
         <item>640x360</item> // 360P
         <item>640x480</item> // 480P
         <item>1280x720</item> // 720P
-        <item>360x640</item>   // 360p
     </string-array>
 
     <string-array
@@ -31,7 +36,12 @@
         <item>15</item> // 360P
         <item>15</item> // 480P
         <item>15</item> // 720P
-        <item>15</item> //
+        <item>15</item> // 120P
+        <item>15</item> // 180P
+        <item>15</item> // 240P
+        <item>15</item> // 360P
+        <item>15</item> // 480P
+        <item>15</item> // 720P
     </string-array>
 
     <string-array
@@ -42,7 +52,12 @@
         <item>400</item> // 360P
         <item>500</item> // 480P
         <item>1000</item> // 720P
+        <item>80</item> // 120P
+        <item>160</item> // 180P
+        <item>200</item> // 240P
         <item>400</item> // 360P
+        <item>500</item> // 480P
+        <item>1000</item> // 720P
     </string-array>
 
     <string name="legal_channel_name_characters">abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&amp;()+,-:;&lt;=.>?@[]^_`{|}~</string>

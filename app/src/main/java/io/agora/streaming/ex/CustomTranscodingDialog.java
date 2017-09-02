@@ -70,13 +70,10 @@ public class CustomTranscodingDialog {
             }
 
         });
+        widthSeekBar.setProgress(mTransCoding.width);
 
         SeekBar heightSeekBar = (SeekBar) layout.findViewById(R.id.text_set_height);
         final TextView heightTextView = (TextView) layout.findViewById(R.id.show_height);
-        //ViewGroup.LayoutParams lp_height = setWidth.getLayoutParams();
-        //setHight.setLayoutParams(lp_height);
-        //setHight.setProgress(mCustomLiveTransCoding.height);
-        //showHeight.setText(mCustomLiveTransCoding.height + "");
         heightSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -97,15 +94,14 @@ public class CustomTranscodingDialog {
             }
 
         });
+        heightSeekBar.setProgress(mTransCoding.height);
+        //ViewGroup.LayoutParams lp_height = setWidth.getLayoutParams();
+        //setHight.setLayoutParams(lp_height);
+        //setHight.setProgress(mCustomLiveTransCoding.height);
+        //showHeight.setText(mCustomLiveTransCoding.height + "");
 
         final SeekBar bitrateSeekBar = (SeekBar) layout.findViewById(R.id.text_set_bitrate);
         final TextView bitRateTextView = (TextView) layout.findViewById(R.id.show_bitrate);
-        //bitrateSeekBar.setMax(1800);
-        //ViewGroup.LayoutParams lp_bitrate = bitrateSeekBar.getLayoutParams();
-        //lp_bitrate.width = 400;
-        //bitrateSeekBar.setLayoutParams(lp_bitrate);
-        //setBitrate.setProgress(mCustomLiveTransCoding.bitrate);
-        //showBitRate.setText(mCustomLiveTransCoding.bitrate + "");
         bitrateSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -127,15 +123,16 @@ public class CustomTranscodingDialog {
             }
 
         });
+        bitrateSeekBar.setProgress(mTransCoding.bitrate);
+        //bitrateSeekBar.setMax(1800);
+        //ViewGroup.LayoutParams lp_bitrate = bitrateSeekBar.getLayoutParams();
+        //lp_bitrate.width = 400;
+        //bitrateSeekBar.setLayoutParams(lp_bitrate);
+        //setBitrate.setProgress(mCustomLiveTransCoding.bitrate);
+        //showBitRate.setText(mCustomLiveTransCoding.bitrate + "");
 
         SeekBar fpsSeekBar = (SeekBar) layout.findViewById(R.id.text_set_fps);
         final TextView fpsTextView = (TextView) layout.findViewById(R.id.show_fps);
-        //setFPS.setMax(60);
-        //ViewGroup.LayoutParams lp_setFPS = setBitrate.getLayoutParams();
-        //lp_setFPS.width = 400;
-        //setFPS.setLayoutParams(lp_setFPS);
-        //setFPS.setProgress(mCustomLiveTransCoding.framerate);
-        //showFPS.setText(mCustomLiveTransCoding.framerate + "");
         fpsSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -156,6 +153,13 @@ public class CustomTranscodingDialog {
             }
 
         });
+        fpsSeekBar.setProgress(mTransCoding.framerate);
+        //setFPS.setMax(60);
+        //ViewGroup.LayoutParams lp_setFPS = setBitrate.getLayoutParams();
+        //lp_setFPS.width = 400;
+        //setFPS.setLayoutParams(lp_setFPS);
+        //setFPS.setProgress(mCustomLiveTransCoding.framerate);
+        //showFPS.setText(mCustomLiveTransCoding.framerate + "");
 
         final CheckBox latencyCheckBox = (CheckBox) layout.findViewById(R.id.cb_low_latency);
         latencyCheckBox.setOnClickListener(null);
@@ -178,12 +182,6 @@ public class CustomTranscodingDialog {
 
         SeekBar gopSeekBar = (SeekBar) layout.findViewById(R.id.text_set_gop);
         final TextView gopTextView = (TextView) layout.findViewById(R.id.show_gop);
-        //setGop.setMax(60);
-        //ViewGroup.LayoutParams Goplp = setGop.getLayoutParams();
-        //Goplp.width = 400;
-        //showGop.setLayoutParams(Goplp);
-        //setGop.setProgress(mCustomLiveTransCoding.gop);
-        //showGop.setText("" +  mCustomLiveTransCoding.gop);
         gopSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -204,7 +202,13 @@ public class CustomTranscodingDialog {
             }
 
         });
-
+        gopSeekBar.setProgress(mTransCoding.gop);
+        //setGop.setMax(60);
+        //ViewGroup.LayoutParams Goplp = setGop.getLayoutParams();
+        //Goplp.width = 400;
+        //showGop.setLayoutParams(Goplp);
+        //setGop.setProgress(mCustomLiveTransCoding.gop);
+        //showGop.setText("" +  mCustomLiveTransCoding.gop);
 
         RadioGroup videoCodec = (RadioGroup) layout.findViewById(R.id.codec);
         if(mTransCoding.videoCodecProfile == Constants.VIDEO_CODEC_PROFILE_TYPE_BASELINE){
@@ -290,6 +294,7 @@ public class CustomTranscodingDialog {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
+        redSeekBar.setProgress(mTransCoding.getRed());
 
         SeekBar greenSeekBar = (SeekBar) layout.findViewById(R.id.set_green);
         final TextView greenTextView = (TextView) layout.findViewById(R.id.set_green_vaule);
@@ -314,7 +319,7 @@ public class CustomTranscodingDialog {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
-
+        greenSeekBar.setProgress(mTransCoding.getGreen());
 
         SeekBar blueSeekBar = (SeekBar) layout.findViewById(R.id.set_blue);
         final TextView blueTextView = (TextView) layout.findViewById(R.id.set_blue_vaule);
@@ -341,7 +346,7 @@ public class CustomTranscodingDialog {
 
             }
         });
-
+        blueSeekBar.setProgress(mTransCoding.getBlue());
 
         if(mTransCoding.layout == CustomTranscoding.LAYOUT_DEFAULT){
             RadioButton button =  (RadioButton) layout.findViewById(R.id.transcode_default);

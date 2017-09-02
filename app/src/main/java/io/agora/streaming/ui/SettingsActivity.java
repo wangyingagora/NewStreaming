@@ -12,9 +12,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import io.agora.streaming.R;
+import io.agora.streaming.ex.AgoraBaseActivity;
 import io.agora.streaming.model.ConstantApp;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AgoraBaseActivity {
+    private final static String TAG = SettingsActivity.class.getSimpleName();
+
     private VideoProfileAdapter mVideoProfileAdapter;
     private String GET_WIDTH_VAULE = "get width";
     private String GET_HEIGHT_VAULE = "get height";
@@ -37,13 +40,13 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void initUi() {
         RecyclerView v_profiles = (RecyclerView) findViewById(R.id.profiles);
-        v_profiles.setHasFixedSize(true);
+        //v_profiles.setHasFixedSize(true);
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         int prefIndex = pref.getInt(ConstantApp.PrefManager.PREF_PROPERTY_PROFILE_IDX, ConstantApp.DEFAULT_PROFILE_IDX);
 
         mVideoProfileAdapter = new VideoProfileAdapter(this, prefIndex);
-        mVideoProfileAdapter.setHasStableIds(true);
+        //mVideoProfileAdapter.setHasStableIds(true);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         v_profiles.setLayoutManager(layoutManager);
@@ -82,45 +85,17 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putInt(ConstantApp.PrefManager.PREF_PROPERTY_PROFILE_IDX, profileIndex);
         editor.apply();
 
-        switch (profileIndex){
-            case 0:
-                width = 160;
-                height = 120;
-                bitrate = 80;
-                break;
-            case 1:
-                width = 320;
-                height = 180;
-                bitrate = 160;
-                break;
-            case 2:
-                width = 320;
-                height = 240;
-                bitrate = 200;
-                break;
-            case 3:
-                width = 640;
-                height = 360;
-                bitrate = 400;
-                break;
-            case 4:
-                width = 640;
-                height = 480;
-                bitrate = 500;
-                break;
-            case 5:
-                width = 1280;
-                height = 720;
-                bitrate = 1000;
-                break;
-            case 6:
-                width = 360;
-                height = 640;
-                bitrate = 400;
-                break;
-            default:
-                break;
+        String resolution = getResources().getStringArray(R.array.string_array_resolutions)[profileIndex];
+        String frameRate = getResources().getStringArray(R.array.string_array_frame_rate)[profileIndex];
+        String bitRate = getResources().getStringArray(R.array.string_array_bit_rate)[profileIndex];
+        String[] size = resolution.split("x");
+        if (size.length != 2) {
+            Log.e(TAG, "parse resolution failed");
+            return;
         }
+        width = Integer.parseInt(size[0]);
+        height = Integer.parseInt(size[1]);
+        bitrate = Integer.parseInt(bitRate);
 
         mIntent = new Intent();
         mIntent.putExtra(GET_WIDTH_VAULE, width);

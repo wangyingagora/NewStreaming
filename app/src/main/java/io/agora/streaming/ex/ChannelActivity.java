@@ -42,6 +42,7 @@ public class ChannelActivity extends AgoraBaseActivity {
     private int mMyselfId = 0;
 
     private Map<Integer, UserInfo> mUserInfo;
+    private CustomTranscoding mCustomTranscoding;
 
     private RelativeLayout mContainerLayout;
     private LinearLayout mInnerLayout;
@@ -62,6 +63,11 @@ public class ChannelActivity extends AgoraBaseActivity {
         boolean enableVideo = intent.getBooleanExtra(ConstantApp.ACTION_ENABLE_VIDEO, true);
         String channelName = intent.getStringExtra(ConstantApp.ACTION_KEY_CHANNEL_NAME);
 
+        int width = intent.getIntExtra(ConstantApp.ACTION_TRANSFORM_WIDTH, 0);
+        int height =  intent.getIntExtra(ConstantApp.ACTION_TRANSFORM_HEIGHT , 0);
+        int bitrate = intent.getIntExtra(ConstantApp.ACTION_TRANSFORM_BITRATE, 0);
+        initTranscoding(width, height, bitrate);
+
         initEngine(channelName, enableVideo);
 
         initView();
@@ -70,6 +76,14 @@ public class ChannelActivity extends AgoraBaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    private void initTranscoding(int width, int height, int bitrate) {
+        mCustomTranscoding = new CustomTranscoding();
+        mCustomTranscoding.width = width;
+        mCustomTranscoding.height = height;
+        mCustomTranscoding.bitrate = bitrate;
+        mCustomTranscoding.layout = CustomTranscoding.LAYOUT_DEFAULT;
     }
 
     private void initEngine(String channelName, boolean enableVideo) {
@@ -320,7 +334,7 @@ public class ChannelActivity extends AgoraBaseActivity {
     }
 
     private void showTransCodingSettingDialog() {
-        CustomTranscodingDialog dialog = new CustomTranscodingDialog(this, null);
+        CustomTranscodingDialog dialog = new CustomTranscodingDialog(this, mCustomTranscoding);
         dialog.showDialog();
     }
 }

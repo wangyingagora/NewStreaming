@@ -68,8 +68,9 @@
             <SeekBar
                 android:id="@+id/text_set_height"
                 android:layout_marginLeft="10dp"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:max="1024"/>
             <TextView
                 android:textColor="@android:color/black"
@@ -84,6 +85,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:layout_marginRight="16dp"
             android:orientation="horizontal">
             <TextView
                 android:textColor="@android:color/black"
@@ -94,15 +96,16 @@
             <SeekBar
                 android:id="@+id/text_set_bitrate"
                 android:layout_marginLeft="10dp"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:max="1800"/>
             <TextView
                 android:textColor="@android:color/black"
                 android:id="@+id/show_bitrate"
                 android:text="1"
                 android:layout_marginLeft="10dp"
-                android:layout_width="wrap_content"
+                android:layout_width="32dp"
                 android:layout_height="match_parent"/>
         </LinearLayout>
 
@@ -120,8 +123,9 @@
             <SeekBar
                 android:id="@+id/text_set_fps"
                 android:layout_marginLeft="16dp"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:max="60"/>
             <TextView
                 android:textColor="@android:color/black"
@@ -146,8 +150,9 @@
             <SeekBar
                 android:id="@+id/text_set_gop"
                 android:layout_marginLeft="16dp"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:max="60"/>
             <TextView
                 android:textColor="@android:color/black"
@@ -286,6 +291,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:layout_marginRight="16dp"
             android:orientation="horizontal">
             <TextView
                 android:textColor="@android:color/black"
@@ -296,8 +302,9 @@
             <SeekBar
                 android:id="@+id/set_red"
                 android:layout_marginLeft="14dp"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:max="255"/>
             <TextView
                 android:textColor="@android:color/black"
@@ -312,6 +319,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:layout_marginRight="16dp"
             android:orientation="horizontal">
             <TextView
                 android:textColor="@android:color/black"
@@ -322,8 +330,9 @@
             <SeekBar
                 android:id="@+id/set_green"
                 android:layout_marginLeft="10dp"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:max="255"/>
             <TextView
                 android:textColor="@android:color/black"
@@ -338,6 +347,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:layout_marginRight="16dp"
             android:orientation="horizontal">
             <TextView
                 android:textColor="@android:color/black"
@@ -348,8 +358,9 @@
             <SeekBar
                 android:id="@+id/set_blue"
                 android:layout_marginLeft="12dp"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:max="255"/>
             <TextView
                 android:textColor="@android:color/black"
