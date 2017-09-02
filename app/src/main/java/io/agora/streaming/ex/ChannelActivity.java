@@ -5,21 +5,17 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.agora.live.LiveChannelConfig;
 import io.agora.live.LiveEngine;
@@ -207,6 +203,14 @@ public class ChannelActivity extends AgoraBaseActivity {
             }
         });
 
+        ImageView customTrancodingView = findViewForId(R.id.custom_settings);
+        customTrancodingView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTransCodingSettingDialog();
+            }
+        });
+
         ImageView endCallView = findViewForId(R.id.end_call);
         endCallView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -254,7 +258,7 @@ public class ChannelActivity extends AgoraBaseActivity {
             }
         });
 
-        //mUserInfo.clear();
+        mUserInfo.clear();
         finish();
     }
 
@@ -313,5 +317,10 @@ public class ChannelActivity extends AgoraBaseActivity {
 
         mUserInfo.put(uid, user);
         return user;
+    }
+
+    private void showTransCodingSettingDialog() {
+        CustomTranscodingDialog dialog = new CustomTranscodingDialog(this, null);
+        dialog.showDialog();
     }
 }

@@ -28,4 +28,7 @@
     // DO NOT TRANSLATE
     <string name="bit_rate_value_with_unit">%d kbps</string>
     <string name="frame_rate_value_with_unit">%d fps</string>
+
+
+    <string name="enable_custom_transcoding"></string>
 </resources>
