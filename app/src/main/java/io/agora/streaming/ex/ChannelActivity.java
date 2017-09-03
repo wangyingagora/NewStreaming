@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,15 +89,11 @@ public class ChannelActivity extends AgoraBaseActivity {
         mPublishersAdapter = new PublisherListAdapter(this, new ArrayList<UrlData>(), new SubscribeListener() {
             @Override
             public void subscribe(final int uid, final Media media, final VideoLayout layout, final StreamFormat format) {
-                Log.e(TAG, "subscribe to: " + uid);
                 subscribePublisher(uid, media, layout, format);
-
-                //mVideoAdapter.updateVideoData(getSmallVideoUser());
             }
 
             @Override
             public void unsubscribe(int uid) {
-                Log.e(TAG, "unsubscribe to: " + uid);
                 mSubscriber.unsubscribe(uid);
                 //mUserInfo.remove(uid);
                 mUserInfo.get(uid).hasSubscribed = false;
@@ -145,7 +142,7 @@ public class ChannelActivity extends AgoraBaseActivity {
             }
 
             @Override
-            public void onJoinChannel(String channel, final int uid, int elapsed) {
+            public void onJoinChannel(final String channel, final int uid, int elapsed) {
                 Log.e(TAG, "onJoinChannel: channel: " + channel + ", uid: " + uid);
 
                 //mMyselfId = uid;
@@ -153,6 +150,7 @@ public class ChannelActivity extends AgoraBaseActivity {
                     @Override
                     public void run() {
                         createViewableUser(uid, true);
+                        updateUI(channel);
                     }
                 });
             }
@@ -339,7 +337,11 @@ public class ChannelActivity extends AgoraBaseActivity {
         mVideoAdapter = new VideoAdapter(this, getSmallVideoUser());
         mVideoListView.setLayoutManager(gridLayoutManager);
         mVideoListView.setAdapter(mVideoAdapter);
+    }
 
+    private void updateUI(String channelName) {
+        TextView channelView = findViewForId(R.id.channel_name);
+        channelView.setText(channelName);
     }
 
     private void doPublish(ImageView view) {
