@@ -10,6 +10,7 @@ public class UserInfo {
     int uid;
     boolean isLocal;
     SurfaceView view;
+    boolean hasSubscribed;
 
     public boolean isLocal() {
         return isLocal;

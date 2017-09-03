@@ -13,4 +13,6 @@
     <color name="transparent_75_white">#ACFFFFFF</color>
 
     <color name="dark_gray">#FF55585A</color>
+
+    <color name="color_cccccc">#cccccc</color>
 </resources>

@@ -1,15 +1,12 @@
-package io.agora.streaming.ui;
+package io.agora.streaming.ex;
 import android.content.Context;
 import android.support.annotation.IdRes;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import java.util.ArrayList;
@@ -19,27 +16,37 @@ import io.agora.streaming.R;
  * Created by xdf20 on 2017/8/15.
  */
 
-public class MyListViewAdapter extends BaseAdapter {
+public class PublisherListAdapter extends BaseAdapter {
     Context context;
     private LayoutInflater inflater;
-    ArrayList<UrlData> list;
-    private MySubscribeCallback subscribeCallback;
-    public MyListViewAdapter(Context context,ArrayList list, MySubscribeCallback callback){
+    ArrayList<UrlData> mData;
+    private SubscribeListener subscribeCallback;
+    public PublisherListAdapter(Context context, ArrayList<UrlData> data, SubscribeListener callback){
         this.context = context;
         inflater = LayoutInflater.from(context);
-        this.list = list;
+        mData = data;
+        if (mData == null) {
+            mData = new ArrayList<>();
+        }
         this.subscribeCallback = callback;
     }
 
+    public void updatePublishers(ArrayList<UrlData> publishers) {
+        if (publishers == null) {
+            publishers = new ArrayList<>();
+        }
+        mData = publishers;
+        notifyDataSetChanged();
+    }
 
     @Override
     public int getCount() {
-        return list.size();
+        return mData.size();
     }
 
     @Override
     public UrlData getItem(int position) {
-        return list.get(position);
+        return mData.get(position);
     }
 
     @Override
@@ -50,7 +57,7 @@ public class MyListViewAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Holder holder;
-        final UrlData data  = list.get(position);
+        final UrlData data  = mData.get(position);
         if(convertView == null){
             holder = new Holder();
             convertView = inflater.inflate(R.layout.item_listview, null);
@@ -66,18 +73,18 @@ public class MyListViewAdapter extends BaseAdapter {
         }
 
         holder.mCheckBox.setOnClickListener(null);
-        holder.mCheckBox.setChecked(list.get(position).mChecked);
+        holder.mCheckBox.setChecked(mData.get(position).mChecked);
         holder.mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!((CheckBox) v).isChecked()){
-                    list.get(position).mChecked = false;
-                    subscribeCallback.unSubscibe(Integer.valueOf(list.get(position).Url).intValue());
+                    mData.get(position).mChecked = false;
+                    subscribeCallback.unsubscribe(Integer.valueOf(mData.get(position).Url).intValue());
                 } else {
-                    long uid = (Integer.valueOf(list.get(position).Url).intValue() & 0xFFFFFFFFL);
-                    Log.e("adam", "subscribeCallback uid is " + uid);
-                    subscribeCallback.Subsccribe(Integer.valueOf(list.get(position).Url).intValue(), list.get(position).mMeidia ,list.get(position).mLayout, list.get(position).mFormat);
-                    list.get(position).mChecked = true;
+                    long uid = (Integer.valueOf(mData.get(position).Url).intValue() & 0xFFFFFFFFL);
+                    //Log.e("adam", "subscribeCallback uid is " + uid);
+                    subscribeCallback.subscribe(Integer.valueOf(mData.get(position).Url).intValue(), mData.get(position).mMeidia ,mData.get(position).mLayout, mData.get(position).mFormat);
+                    mData.get(position).mChecked = true;
                 }
             }
         });
@@ -86,9 +93,9 @@ public class MyListViewAdapter extends BaseAdapter {
         holder.url.setText(uidL + "");
 
         holder.mStreamType.setOnCheckedChangeListener(null);
-        if(list.get(position).mFormat == StreamFormat.High) {
+        if(mData.get(position).mFormat == StreamFormat.High) {
             holder.mStreamType.check(R.id.stream_type_high);
-        } else if(list.get(position).mFormat == StreamFormat.Low){
+        } else if(mData.get(position).mFormat == StreamFormat.Low){
             holder.mStreamType.check(R.id.stream_type_low);
         }
 
@@ -97,52 +104,49 @@ public class MyListViewAdapter extends BaseAdapter {
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 switch (R.id.stream_type){
                     case R.id.stream_type_high:
-                        list.get(position).mFormat = StreamFormat.High;
+                        mData.get(position).mFormat = StreamFormat.High;
                         break;
                     case R.id.stream_type_low:
-                        list.get(position).mFormat = StreamFormat.Low;
+                        mData.get(position).mFormat = StreamFormat.Low;
                         break;
                     default:
                         break;
                 }
-                subscribeCallback.Subsccribe(Integer.valueOf(list.get(position).Url).intValue(), list.get(position).mMeidia ,list.get(position).mLayout, list.get(position).mFormat);
+                subscribeCallback.subscribe(Integer.valueOf(mData.get(position).Url).intValue(), mData.get(position).mMeidia, mData.get(position).mLayout, mData.get(position).mFormat);
             }
         });
 
-
-
         holder.mSetMediaType.setOnCheckedChangeListener(null);
 
-        if(list.get(position).mMeidia == Media.AV){
+        if(mData.get(position).mMeidia == Media.AV){
             holder.mSetMediaType.check(R.id.media_type_av);
-        } else if(list.get(position).mMeidia == Media.AUDIO){
+        } else if(mData.get(position).mMeidia == Media.AUDIO){
             holder.mSetMediaType.check(R.id.media_type_audio);
-        } else if(list.get(position).mMeidia == Media.VIDEO) {
+        } else if(mData.get(position).mMeidia == Media.VIDEO) {
             holder.mSetMediaType.check(R.id.media_type_video);
-        } else if(list.get(position).mMeidia == Media.NONIE){
+        } else if(mData.get(position).mMeidia == Media.NONIE){
             holder.mSetMediaType.check(R.id.media_type_none);
         }
-
 
         holder.mSetMediaType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 switch (checkedId) {
                     case R.id.media_type_av:
-                        list.get(position).mMeidia = Media.AV;
+                        mData.get(position).mMeidia = Media.AV;
                         break;
                     case R.id.media_type_audio:
-                        list.get(position).mMeidia = Media.AUDIO;
+                        mData.get(position).mMeidia = Media.AUDIO;
                         break;
                     case R.id.media_type_video:
-                        list.get(position).mMeidia = Media.VIDEO;
+                        mData.get(position).mMeidia = Media.VIDEO;
                         break;
                     case R.id.media_type_none:
-                        list.get(position).mMeidia = Media.NONIE;
+                        mData.get(position).mMeidia = Media.NONIE;
                     default:
                         break;
                 }
-                subscribeCallback.Subsccribe(Integer.valueOf(list.get(position).Url).intValue(), list.get(position).mMeidia ,list.get(position).mLayout, list.get(position).mFormat);
+                subscribeCallback.subscribe(Integer.valueOf(mData.get(position).Url).intValue(), mData.get(position).mMeidia ,mData.get(position).mLayout, mData.get(position).mFormat);
             }
 
         });
@@ -150,11 +154,11 @@ public class MyListViewAdapter extends BaseAdapter {
 
         holder.mSetVideoType.setOnCheckedChangeListener(null);
 
-        if(list.get(position).mLayout == VideoLayout.Fit){
+        if(mData.get(position).mLayout == VideoLayout.Fit){
             holder.mSetVideoType.check(R.id.video_type_fit);
-        } else if(list.get(position).mLayout == VideoLayout.Adaptive){
+        } else if(mData.get(position).mLayout == VideoLayout.Adaptive){
             holder.mSetVideoType.check(R.id.video_type_adaptive);
-        } else if(list.get(position).mLayout == VideoLayout.Hideden){
+        } else if(mData.get(position).mLayout == VideoLayout.Hideden){
             holder.mSetVideoType.check(R.id.video_type_hidden);
         }
 
@@ -163,18 +167,18 @@ public class MyListViewAdapter extends BaseAdapter {
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 switch (checkedId){
                     case R.id.video_type_hidden:
-                        list.get(position).mLayout = VideoLayout.Hideden;
+                        mData.get(position).mLayout = VideoLayout.Hideden;
                         break;
                     case R.id.video_type_fit:
-                        list.get(position).mLayout = VideoLayout.Fit;
+                        mData.get(position).mLayout = VideoLayout.Fit;
                         break;
                     case R.id.video_type_adaptive:
-                        list.get(position).mLayout = VideoLayout.Adaptive;
+                        mData.get(position).mLayout = VideoLayout.Adaptive;
                         break;
                     default:
                         break;
                 }
-                subscribeCallback.Subsccribe(Integer.valueOf(list.get(position).Url).intValue(), list.get(position).mMeidia ,list.get(position).mLayout, list.get(position).mFormat);
+                subscribeCallback.subscribe(Integer.valueOf(mData.get(position).Url).intValue(), mData.get(position).mMeidia ,mData.get(position).mLayout, mData.get(position).mFormat);
             }
         });
 
@@ -188,6 +192,5 @@ public class MyListViewAdapter extends BaseAdapter {
         RadioGroup mSetVideoType;
         RadioGroup mStreamType;
     }
-
 
 }

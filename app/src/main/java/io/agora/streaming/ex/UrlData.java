@@ -1,4 +1,4 @@
-package io.agora.streaming.ui;
+package io.agora.streaming.ex;
 
 /**
  * Created by xdf20 on 2017/8/15.

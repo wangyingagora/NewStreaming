@@ -5,14 +5,21 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 
+import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -25,6 +32,7 @@ import io.agora.live.LivePublisherHandler;
 import io.agora.live.LiveStats;
 import io.agora.live.LiveSubscriber;
 import io.agora.live.LiveSubscriberHandler;
+import io.agora.live.LiveTranscoding;
 import io.agora.rtc.Constants;
 import io.agora.rtc.RtcEngine;
 import io.agora.streaming.R;
@@ -49,6 +57,10 @@ public class ChannelActivity extends AgoraBaseActivity {
     private LinearLayout mOuterLayout;
     private RelativeLayout mOuterTopLayout;
     private RecyclerView mVideoListView;
+    private VideoAdapter mVideoAdapter;
+
+    //private ArrayList<UrlData> mAllPublishers;
+    private PublisherListAdapter mPublishersAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,6 +69,26 @@ public class ChannelActivity extends AgoraBaseActivity {
         setContentView(R.layout.activity_channel_ex);
 
         mUserInfo = new HashMap<>();
+        //mAllPublishers = new ArrayList<>();
+        mPublishersAdapter = new PublisherListAdapter(this, new ArrayList<UrlData>(), new SubscribeListener() {
+            @Override
+            public void subscribe(final int uid, final Media media, final VideoLayout layout, final StreamFormat format) {
+                Log.e(TAG, "subscribe to: " + uid);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        subscribePublisher(uid, media, layout, format);
+                    }
+                });
+
+                //mVideoAdapter.updateVideoData(getSmallVideoUser());
+            }
+
+            @Override
+            public void unsubscribe(int uid) {
+                Log.e(TAG, "unsubscribe to: " + uid);
+            }
+        });
 
         Intent intent = getIntent();
 
@@ -175,8 +207,14 @@ public class ChannelActivity extends AgoraBaseActivity {
 
         mSubscriber = new LiveSubscriber(mLiveEngine, new LiveSubscriberHandler() {
             @Override
-            public void publishedByHostUid(int uid, int streamType) {
+            public void publishedByHostUid(final int uid, final int streamType) {
                 Log.e(TAG, "publishedByHostUid: " + uid + ", streamType: " + streamType);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        addNewPublisher(uid, streamType);
+                    }
+                });
             }
 
             @Override
@@ -225,6 +263,14 @@ public class ChannelActivity extends AgoraBaseActivity {
             }
         });
 
+        ImageView publisersView = findViewForId(R.id.action_publishers);
+        publisersView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPublisherList();
+            }
+        });
+
         ImageView endCallView = findViewForId(R.id.end_call);
         endCallView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -232,11 +278,45 @@ public class ChannelActivity extends AgoraBaseActivity {
                 endCall();
             }
         });
+
+        //recycleview list item cannot be reused
+        mVideoListView.setHasFixedSize(true);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, AgoraConstans.VIDEO_COLUMNS);
+        /*
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+            }
+        });
+
+        mVideoListView.addItemDecoration(
+                new HorizontalDividerItemDecoration.Builder(this)
+                        .colorResId(R.color.colorAccent)
+                        .sizeResId(R.dimen.video_item_divider)
+                        .margin(0, 0)
+                        .build());
+                        ArrayList<UserInfo> users = new ArrayList<>();
+        for (int i = 0; i < 32; ++i) {
+            UserInfo user = new UserInfo();
+            user.uid = i;
+            user.view = RtcEngine.CreateRendererView(this);
+            user.view.setZOrderOnTop(false);
+            user.view.setZOrderMediaOverlay(false);
+
+            users.add(user);
+        }
+        */
+
+
+        mVideoAdapter = new VideoAdapter(this, getSmallVideoUser());
+        mVideoListView.setLayoutManager(gridLayoutManager);
+        mVideoListView.setAdapter(mVideoAdapter);
+
     }
 
     private void doPublish(ImageView view) {
-        UserInfo user = getLocalUser();
-        if (user == null) {
+        UserInfo localUser = getLocalUser();
+        if (localUser == null) {
             showToast("The local user dose not join channel");
             return;
         }
@@ -249,9 +329,9 @@ public class ChannelActivity extends AgoraBaseActivity {
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT);
-            user.view.setLayoutParams(params);
-            mInnerLayout.addView(user.view);
-            mLiveEngine.startPreview(user.view, Constants.RENDER_MODE_HIDDEN);
+            localUser.view.setLayoutParams(params);
+            mInnerLayout.addView(localUser.view);
+            mLiveEngine.startPreview(localUser.view, Constants.RENDER_MODE_HIDDEN);
             mLivePublisher.publishWithPermissionKey("");
         } else {
             view.setTag(false);
@@ -304,6 +384,7 @@ public class ChannelActivity extends AgoraBaseActivity {
         return false;
     }
 
+
     private UserInfo createViewableUser(int uid, boolean isLocal) {
         if (uid == 0) {
             Log.e(TAG, "uid is 0, invalid user");
@@ -327,14 +408,166 @@ public class ChannelActivity extends AgoraBaseActivity {
         user = new UserInfo();
         user.uid = uid;
         user.isLocal = isLocal;
+        user.hasSubscribed = false;
         user.view = surfaceView;
 
         mUserInfo.put(uid, user);
         return user;
     }
 
+    private ArrayList<UserInfo> getSmallVideoUser() {
+        ArrayList<UserInfo> users = new ArrayList<>();
+        if (mCustomTranscoding.layout == CustomTranscoding.LAYOUT_DEFAULT) {
+        } else if (mCustomTranscoding.layout == CustomTranscoding.LAYOUT_FLOAT) {
+            users = getPublishers(true);
+        } else if (mCustomTranscoding.layout == CustomTranscoding.LAYOUT_TITLE) {
+            users = getPublishers(true);
+        } else if (mCustomTranscoding.layout == CustomTranscoding.LAYOUT_MATRIX) {
+            Iterator<Map.Entry<Integer, UserInfo>> itrMap = mUserInfo.entrySet().iterator();
+            while (itrMap.hasNext()) {
+                Map.Entry<Integer, UserInfo> entry = itrMap.next();
+                UserInfo user = entry.getValue();
+                if (!user.isLocal && !user.hasSubscribed) {
+                    continue;
+                }
+                users.add(user);
+            }
+        }
+        return users;
+    }
+
+    private ArrayList<UserInfo> getPublishers(boolean isSubscribed) {
+        ArrayList<UserInfo> users = new ArrayList<>();
+        Iterator<Map.Entry<Integer, UserInfo>> itrMap = mUserInfo.entrySet().iterator();
+        while (itrMap.hasNext()) {
+            Map.Entry<Integer, UserInfo> entry = itrMap.next();
+            UserInfo user = entry.getValue();
+            if (user.isLocal) {
+                continue;
+            }
+            if (isSubscribed) {
+                if (!user.hasSubscribed) {
+                    continue;
+                }
+            }
+            users.add(user);
+        }
+        return users;
+    }
+
     private void showTransCodingSettingDialog() {
         CustomTranscodingDialog dialog = new CustomTranscodingDialog(this, mCustomTranscoding);
+        dialog.setOnUpdateTranscodingListener(new CustomTranscodingDialog.OnUpdateTranscodingListener() {
+            @Override
+            public void onUpdateTranscoding(CustomTranscoding customTranscoding) {
+                setTranscoding(customTranscoding);
+            }
+        });
         dialog.showDialog();
+    }
+
+    private void setTranscoding(CustomTranscoding mTransCoding) {
+        if (!mTransCoding.isEnabled) {
+            showToast("Transcoding is disabled");
+            return;
+        }
+        ArrayList<LiveTranscoding.TranscodingUser> transcodingUsers = null;
+        ArrayList<UserInfo> smallVideoUsers = getSmallVideoUser();
+        if (mTransCoding.layout == CustomTranscoding.LAYOUT_DEFAULT) {
+            transcodingUsers = null;
+        } else if(mTransCoding.layout == CustomTranscoding.LAYOUT_FLOAT){
+            transcodingUsers = TranscodingLayoutEx.floatLayout(mMyselfId, smallVideoUsers, 0, mTransCoding.width, mTransCoding.height);
+        } else if(mTransCoding.layout == CustomTranscoding.LAYOUT_TITLE){
+            transcodingUsers = TranscodingLayoutEx.titleLayout(mMyselfId, smallVideoUsers, 0, mTransCoding.width, mTransCoding.height);
+        } else if(mTransCoding.layout == CustomTranscoding.LAYOUT_MATRIX){
+            transcodingUsers = TranscodingLayoutEx.martixLayout(mMyselfId, smallVideoUsers, 0, mTransCoding.width, mTransCoding.height);
+        }
+
+        mTransCoding.setUsers(transcodingUsers);
+
+        mVideoAdapter.updateVideoData(smallVideoUsers);
+
+        mLivePublisher.setLiveTranscoding(mTransCoding);
+    }
+
+    private void showPublisherList() {
+        AlertDialog.Builder builder;
+        AlertDialog alertDialog;
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View layout = inflater.inflate(R.layout.myview, null);
+        ListView publisherListView = (ListView) layout.findViewById(R.id.mylistview);
+        publisherListView.setAdapter(mPublishersAdapter);
+
+        builder = new AlertDialog.Builder(this);
+        builder.setView(layout);
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void addNewPublisher(int uid, int streamType) {
+        if (mUserInfo.get(uid) != null) return;
+
+        UserInfo publisher = createViewableUser(uid, false);
+
+        ArrayList<UrlData> publishers = new ArrayList<>();
+        ArrayList<UserInfo> users = getPublishers(false);
+        for (UserInfo user : users) {
+            UrlData data = new UrlData(user.uid + "", user.hasSubscribed, Media.AV, VideoLayout.Hideden, StreamFormat.High);
+            publishers.add(data);
+        }
+        mPublishersAdapter.updatePublishers(publishers);
+    }
+
+    public void subscribePublisher(int uid, Media media, VideoLayout layout, StreamFormat format) {
+        int mediaType = Constants.MEDIA_TYPE_NONE;
+        int videoLayout = 0;
+        int streamType = 0;
+
+        if (media == Media.AV) {
+            mediaType = Constants.MEDIA_TYPE_AUDIO_AND_VIDEO;
+        } else if (media == Media.AUDIO) {
+            mediaType = Constants.MEDIA_TYPE_AUDIO_ONLY;
+        } else if (media == Media.VIDEO) {
+            mediaType = Constants.MEDIA_TYPE_VIDEO_ONLY;
+        } else if (media == Media.NONIE) {
+            mediaType = Constants.MEDIA_TYPE_NONE;
+        }
+
+        if (VideoLayout.Adaptive == layout) {
+            videoLayout = 3;
+        } else if (VideoLayout.Fit == layout) {
+            videoLayout = 2;
+        } else if (VideoLayout.Hideden == layout) {
+            videoLayout = 1;
+        }
+
+        if (StreamFormat.High == format) {
+            streamType = 0;
+        } else if (StreamFormat.Low == format) {
+            streamType = 1;
+        }
+
+        ArrayList<UserInfo> publishers = getSmallVideoUser();
+        SurfaceView surfaceView = RtcEngine.CreateRendererView(this);
+        surfaceView.setZOrderOnTop(false);
+        surfaceView.setZOrderMediaOverlay(false);
+
+        UserInfo user = new UserInfo();
+        user.uid = uid;
+        user.isLocal = false;
+        user.hasSubscribed = false;
+        user.view = surfaceView;
+        publishers.add(user);
+
+        mVideoAdapter.updateVideoData(publishers);
+        //UserInfo user = mUserInfo.get(uid);
+        mSubscriber.subscribe(uid, mediaType, user.view, videoLayout, streamType);
+        //setTranscoding(mCustomTranscoding);
+        //doRenderRemoteUi(Uid);
+        //SurfaceView surfaceView = mUidsList.get(Uid);
+        //Subscriber sub = new Subscriber(Uid, mediaType, surfaceView, videoLayout, streamType);
+        //mSubList.put(Uid, sub);
+        //worker().getLiveSubscriber().subscribe(Uid, mediaType, surfaceView, videoLayout, streamType);
+        //setTranscodingLayout(layout_transform);
     }
 }

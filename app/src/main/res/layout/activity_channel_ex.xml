@@ -31,7 +31,9 @@
                 android:id="@+id/video_view_list"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
             </android.support.v7.widget.RecyclerView>
         </LinearLayout>
 
@@ -65,14 +67,14 @@
             android:src="@drawable/live_rtmp"/>
 
         <ImageView
-            android:id="@+id/suscribe"
+            android:id="@+id/action_publishers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:src="@drawable/live_subscriber"/>
 
         <ImageView
-            android:id="@+id/media_type"
+            android:id="@+id/action_media_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

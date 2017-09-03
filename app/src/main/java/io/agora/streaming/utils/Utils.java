@@ -6,6 +6,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by eaglewangy on 25/08/2017.
@@ -38,5 +39,15 @@ public class Utils {
                 });
         alertDialog = builder.create();
         alertDialog.show();
+    }
+
+    public static int randomColor() {
+        Random rand =new Random(128);
+        int red = rand.nextInt(255);
+        int green = rand.nextInt(255);
+        int blue = rand.nextInt(255);
+        int backgroundColor = 0;
+        backgroundColor = red << 16 | green << 8 | blue << 0;
+        return backgroundColor;
     }
 }
