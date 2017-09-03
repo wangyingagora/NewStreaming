@@ -13,6 +13,17 @@
         android:listSelector="#00000000" >
     </ListView>
 
+    <EditText
+        android:id="@+id/transcode_room"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@android:color/darker_gray"
+        android:textColor="@android:color/black"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
@@ -21,7 +32,7 @@
 
     <Button
         android:textColor="@android:color/black"
-        android:text="Transcoding"
+        android:text="Add transcoding"
         android:id="@id/btn_transcoding"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -29,7 +40,7 @@
      <Button
          android:textColor="@android:color/black"
          android:id="@id/btn_none_transcoding"
-         android:text="+ None Transcoding"
+         android:text="Add none transcoding"
          android:layout_marginLeft="10dp"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content" />

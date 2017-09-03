@@ -50,4 +50,8 @@ public class Utils {
         backgroundColor = red << 16 | green << 8 | blue << 0;
         return backgroundColor;
     }
+
+    public static String getStreamUrl(String room) {
+        return "rtmp://vid-130451.push.fastweb.broadcastapp.agoraio.cn/live/" + room;
+    }
 }

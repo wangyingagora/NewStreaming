@@ -8,22 +8,22 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
-import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.agora.live.LiveChannelConfig;
 import io.agora.live.LiveEngine;
@@ -38,6 +38,7 @@ import io.agora.rtc.Constants;
 import io.agora.rtc.RtcEngine;
 import io.agora.streaming.R;
 import io.agora.streaming.model.ConstantApp;
+import io.agora.streaming.utils.Utils;
 
 /**
  * Created by eaglewangy on 30/08/2017.
@@ -52,6 +53,9 @@ public class ChannelActivity extends AgoraBaseActivity {
 
     private Map<Integer, UserInfo> mUserInfo;
     private CustomTranscoding mCustomTranscoding;
+
+    private ArrayList<String> mListTranscode;
+    private TranscodeListAdapter mTranscodeListAdapter;
 
     private RelativeLayout mContainerLayout;
     private LinearLayout mInnerLayout;
@@ -70,6 +74,16 @@ public class ChannelActivity extends AgoraBaseActivity {
         setContentView(R.layout.activity_channel_ex);
 
         mUserInfo = new HashMap<>();
+        mListTranscode = new ArrayList<>();
+        mTranscodeListAdapter = new TranscodeListAdapter(this, (ArrayList) mListTranscode);
+        mTranscodeListAdapter.setOnRTMPItemDeleteListener(new TranscodeListAdapter.OnRTMPItemDeleteListener() {
+            @Override
+            public void onDelete(String url) {
+                if (url == null) return;
+                mLivePublisher.removeStreamUrl(url);
+            }
+        });
+
         //mAllPublishers = new ArrayList<>();
         mPublishersAdapter = new PublisherListAdapter(this, new ArrayList<UrlData>(), new SubscribeListener() {
             @Override
@@ -269,11 +283,19 @@ public class ChannelActivity extends AgoraBaseActivity {
             }
         });
 
-        ImageView publisersView = findViewForId(R.id.action_publishers);
-        publisersView.setOnClickListener(new View.OnClickListener() {
+        ImageView publishersView = findViewForId(R.id.action_publishers);
+        publishersView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showPublisherList();
+            }
+        });
+
+        ImageView rtmpView = findViewForId(R.id.rtmp);
+        rtmpView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setTranscodingDialog();
             }
         });
 
@@ -524,7 +546,7 @@ public class ChannelActivity extends AgoraBaseActivity {
         }
         mPublishersAdapter.updatePublishers(publishers);
     }
-    
+
     public void subscribePublisher(int uid, Media media, VideoLayout layout, StreamFormat format) {
         int mediaType = Constants.MEDIA_TYPE_NONE;
         int videoLayout = 0;
@@ -584,5 +606,75 @@ public class ChannelActivity extends AgoraBaseActivity {
             publishers.add(data);
         }
         mPublishersAdapter.updatePublishers(publishers);
+    }
+
+    private void setTranscodingDialog() {
+        AlertDialog.Builder builder;
+        AlertDialog alertDialog;
+        View view = LayoutInflater.from(this).inflate(R.layout.layout_rtmp, null);
+
+        Button transcodingButton = (Button) view.findViewById(R.id.btn_transcoding);
+        Button noTranscodingButton = (Button) view.findViewById(R.id.btn_none_transcoding);
+        final EditText editText = (EditText)view.findViewById(R.id.transcode_room);
+        ListView listView = (ListView) view.findViewById(R.id.listview_transcodeing);
+        listView.setAdapter(mTranscodeListAdapter);
+
+        transcodingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //actionTranscodeDialog();
+                addTranscodingUrl(editText.getText().toString().trim());
+            }
+        });
+
+        noTranscodingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addNoneTranscodingUrl(editText.getText().toString().trim());
+            }
+        });
+
+        builder = new AlertDialog.Builder(this);
+        builder.setView(view);
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void addTranscodingUrl(String room) {
+        if (TextUtils.isEmpty(room)) {
+            return;
+        }
+
+        String url = Utils.getStreamUrl(room);
+
+        if (Utils.hasExists(mListTranscode, url)) {
+            Utils.showSimpleDialog(ChannelActivity.this, "Existed name");
+            return;
+        }
+        mListTranscode.add(url);
+        int result = mLivePublisher.addStreamUrl(url, true);
+
+        mTranscodeListAdapter.notifyDataSetChanged();
+
+        //postMessageOnMainThread(new Message(new User(mLocalUid, String.valueOf(mLocalUid)), new String("publish transcode url(" + result + "): " + url)));
+    }
+
+    private void addNoneTranscodingUrl(String room) {
+        if (TextUtils.isEmpty(room)) {
+            return;
+        }
+
+        String url = Utils.getStreamUrl(room);
+
+        if (Utils.hasExists(mListTranscode, url)) {
+            Utils.showSimpleDialog(ChannelActivity.this, "Existed name");
+            return;
+        }
+        mListTranscode.add(url);
+        int result = mLivePublisher.addStreamUrl(url, false);
+
+        mTranscodeListAdapter.notifyDataSetChanged();
+
+        //postMessageOnMainThread(new Message(new User(mLocalUid, String.valueOf(mLocalUid)), new String("publish transcode url(" + result + "): " + url)));
     }
 }

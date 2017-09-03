@@ -1,4 +1,4 @@
-package io.agora.streaming.ui;
+package io.agora.streaming.ex;
 
 import android.app.AlertDialog;
 import android.content.Context;
