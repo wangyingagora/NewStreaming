@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,6 +23,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,6 +41,10 @@ import io.agora.rtc.Constants;
 import io.agora.rtc.RtcEngine;
 import io.agora.streaming.R;
 import io.agora.streaming.model.ConstantApp;
+import io.agora.streaming.model.Message;
+import io.agora.streaming.model.User;
+import io.agora.streaming.ui.InChannelMessageListAdapter;
+import io.agora.streaming.ui.MessageListDecoration;
 import io.agora.streaming.utils.Utils;
 
 /**
@@ -67,6 +73,9 @@ public class ChannelActivity extends AgoraBaseActivity {
 
     //private ArrayList<UrlData> mAllPublishers;
     private PublisherListAdapter mPublishersAdapter;
+
+    private InChannelMessageListAdapter mMessageAdapter;
+    private ArrayList<Message> mMessageList;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -153,6 +162,7 @@ public class ChannelActivity extends AgoraBaseActivity {
                         updateUI(channel);
                     }
                 });
+                sendMessageOnMainThread(new Message(new User(uid, String.valueOf(uid)), new String("user " + uid + " joined " + channel)));
             }
 
             @Override
@@ -194,22 +204,22 @@ public class ChannelActivity extends AgoraBaseActivity {
         mLivePublisher = new LivePublisher(mLiveEngine, new LivePublisherHandler() {
             @Override
             public void onPublishSuccess(String url) {
-                Log.e(TAG, "onPublishSuccess: " + url);
+                sendMessageOnMainThread(new Message(new User(mMyselfId, String.valueOf(mMyselfId)), new String("Publish success(pub)" )));
             }
 
             @Override
             public void onPublishedFailed(String url, int errorCode) {
-                Log.e(TAG, "onPublishedFailed: " + url + ", errorCode: " + errorCode);
+                sendMessageOnMainThread(new Message(new User(mMyselfId, String.valueOf(mMyselfId)), new String("Publish failed(pub): " + errorCode)));
             }
 
             @Override
             public void onUnpublished(String url) {
-                Log.e(TAG, "onUnpublished: " + url);
+                sendMessageOnMainThread(new Message(new User(mMyselfId, String.valueOf(mMyselfId)), new String("unpublished by(pub)")));
             }
 
             @Override
             public void onPublisherTranscodingUpdated(LivePublisher publisher) {
-                Log.e(TAG, "onPublisherTranscodingUpdated");
+                sendMessageOnMainThread(new Message(new User(mMyselfId, String.valueOf(mMyselfId)), new String(new Date() + ": Publisher transcoding updated" )));
             }
         });
 
@@ -227,6 +237,7 @@ public class ChannelActivity extends AgoraBaseActivity {
                         addNewPublisher(uid, streamType);
                     }
                 });
+                sendMessageOnMainThread(new Message(new User(uid, String.valueOf(uid)), new String("Published(sub) by " + (uid & 0xFFFFFFFFL))));
             }
 
             @Override
@@ -238,11 +249,12 @@ public class ChannelActivity extends AgoraBaseActivity {
                         processUnPublishForSubscriber(uid);
                     }
                 });
+                sendMessageOnMainThread(new Message(new User(uid, String.valueOf(uid)), new String("unpublished by(sub) " + (uid & 0xFFFFFFFFL))));
             }
 
             @Override
             public void onStreamTypeChangedTo(int streamType, int uid) {
-                Log.e(TAG, "onStreamTypeChangedTo: " + streamType + ", uid: " + uid);
+                sendMessageOnMainThread(new Message(new User(uid, String.valueOf(uid)), new String("stream type changed to " + streamType)));
             }
 
             @Override
@@ -337,11 +349,25 @@ public class ChannelActivity extends AgoraBaseActivity {
         mVideoAdapter = new VideoAdapter(this, getSmallVideoUser());
         mVideoListView.setLayoutManager(gridLayoutManager);
         mVideoListView.setAdapter(mVideoAdapter);
+
+        initMessageList();
     }
 
     private void updateUI(String channelName) {
         TextView channelView = findViewForId(R.id.channel_name);
         channelView.setText(channelName);
+    }
+
+    private void initMessageList() {
+        mMessageList = new ArrayList<>();
+        RecyclerView msgListView = (RecyclerView) findViewById(R.id.msg_list);
+
+        mMessageAdapter = new InChannelMessageListAdapter(this, mMessageList);
+        mMessageAdapter.setHasStableIds(true);
+
+        msgListView.setAdapter(mMessageAdapter);
+        msgListView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
+        msgListView.addItemDecoration(new MessageListDecoration());
     }
 
     private void doPublish(ImageView view) {
@@ -379,6 +405,7 @@ public class ChannelActivity extends AgoraBaseActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                mLivePublisher.unpublish();
                 mLiveEngine.leaveChannel();
             }
         });
@@ -658,7 +685,7 @@ public class ChannelActivity extends AgoraBaseActivity {
 
         mTranscodeListAdapter.notifyDataSetChanged();
 
-        //postMessageOnMainThread(new Message(new User(mLocalUid, String.valueOf(mLocalUid)), new String("publish transcode url(" + result + "): " + url)));
+        sendMessageOnMainThread(new Message(new User(mMyselfId, String.valueOf(mMyselfId)), new String("publish transcode url(" + result + "): " + url)));
     }
 
     private void addNoneTranscodingUrl(String room) {
@@ -677,6 +704,30 @@ public class ChannelActivity extends AgoraBaseActivity {
 
         mTranscodeListAdapter.notifyDataSetChanged();
 
-        //postMessageOnMainThread(new Message(new User(mLocalUid, String.valueOf(mLocalUid)), new String("publish transcode url(" + result + "): " + url)));
+        sendMessageOnMainThread(new Message(new User(mMyselfId, String.valueOf(mMyselfId)), new String("publish none transcode url(" + result + "): " + url)));
+    }
+
+    private void sendMessage(Message msg) {
+        mMessageList.add(msg);
+
+        int MAX_MESSAGE_COUNT = 16;
+
+        if (mMessageList.size() > MAX_MESSAGE_COUNT) {
+            int toRemove = mMessageList.size() - MAX_MESSAGE_COUNT;
+            for (int i = 0; i < toRemove; i++) {
+                mMessageList.remove(i);
+            }
+        }
+
+        mMessageAdapter.notifyDataSetChanged();
+    }
+
+    private void sendMessageOnMainThread(final Message message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                sendMessage(message);
+            }
+        });
     }
 }
