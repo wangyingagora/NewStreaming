@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.agora.live.LiveChannelConfig;
 import io.agora.live.LiveEngine;
@@ -74,12 +75,7 @@ public class ChannelActivity extends AgoraBaseActivity {
             @Override
             public void subscribe(final int uid, final Media media, final VideoLayout layout, final StreamFormat format) {
                 Log.e(TAG, "subscribe to: " + uid);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        subscribePublisher(uid, media, layout, format);
-                    }
-                });
+                subscribePublisher(uid, media, layout, format);
 
                 //mVideoAdapter.updateVideoData(getSmallVideoUser());
             }
@@ -87,6 +83,10 @@ public class ChannelActivity extends AgoraBaseActivity {
             @Override
             public void unsubscribe(int uid) {
                 Log.e(TAG, "unsubscribe to: " + uid);
+                mSubscriber.unsubscribe(uid);
+                //mUserInfo.remove(uid);
+                mUserInfo.get(uid).hasSubscribed = false;
+                mVideoAdapter.updateVideoData(getSmallVideoUser());
             }
         });
 
@@ -218,8 +218,14 @@ public class ChannelActivity extends AgoraBaseActivity {
             }
 
             @Override
-            public void unpublishedByHostUid(int uid) {
+            public void unpublishedByHostUid(final int uid) {
                 Log.e(TAG, "unpublishedByHostUid: " + uid);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        processUnPublishForSubscriber(uid);
+                    }
+                });
             }
 
             @Override
@@ -330,6 +336,7 @@ public class ChannelActivity extends AgoraBaseActivity {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT);
             localUser.view.setLayoutParams(params);
+            localUser.view.setZOrderOnTop(false);
             mInnerLayout.addView(localUser.view);
             mLiveEngine.startPreview(localUser.view, Constants.RENDER_MODE_HIDDEN);
             mLivePublisher.publishWithPermissionKey("");
@@ -384,7 +391,6 @@ public class ChannelActivity extends AgoraBaseActivity {
         return false;
     }
 
-
     private UserInfo createViewableUser(int uid, boolean isLocal) {
         if (uid == 0) {
             Log.e(TAG, "uid is 0, invalid user");
@@ -394,24 +400,25 @@ public class ChannelActivity extends AgoraBaseActivity {
         if (isLocal) {
             mMyselfId = uid;
         }
-        UserInfo user = getLocalUser();
-        if (user != null) {
-            user.uid = uid;
-            mUserInfo.put(uid, user);
-            return user;
-        }
-
+        //UserInfo user = getLocalUser();
         SurfaceView surfaceView = RtcEngine.CreateRendererView(this);
         surfaceView.setZOrderOnTop(false);
         surfaceView.setZOrderMediaOverlay(false);
 
-        user = new UserInfo();
+        UserInfo user = new UserInfo();
         user.uid = uid;
         user.isLocal = isLocal;
         user.hasSubscribed = false;
         user.view = surfaceView;
 
         mUserInfo.put(uid, user);
+
+        for (Integer key : mUserInfo.keySet()) {
+            UserInfo u = mUserInfo.get(key);
+            Log.e(TAG, "User: " + u.uid + ", " + u.isLocal + ", " + u.hasSubscribed);
+        }
+        Log.e(TAG, "total size: " + mUserInfo.size());
+
         return user;
     }
 
@@ -436,16 +443,16 @@ public class ChannelActivity extends AgoraBaseActivity {
         return users;
     }
 
-    private ArrayList<UserInfo> getPublishers(boolean isSubscribed) {
+    private ArrayList<UserInfo> getPublishers(boolean isOnlySubscribed) {
         ArrayList<UserInfo> users = new ArrayList<>();
-        Iterator<Map.Entry<Integer, UserInfo>> itrMap = mUserInfo.entrySet().iterator();
-        while (itrMap.hasNext()) {
-            Map.Entry<Integer, UserInfo> entry = itrMap.next();
+        Iterator<Map.Entry<Integer, UserInfo>> iterator = mUserInfo.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, UserInfo> entry = iterator.next();
             UserInfo user = entry.getValue();
             if (user.isLocal) {
                 continue;
             }
-            if (isSubscribed) {
+            if (isOnlySubscribed) {
                 if (!user.hasSubscribed) {
                     continue;
                 }
@@ -505,7 +512,7 @@ public class ChannelActivity extends AgoraBaseActivity {
     }
 
     private void addNewPublisher(int uid, int streamType) {
-        if (mUserInfo.get(uid) != null) return;
+        if (mUserInfo.get(uid) != null && (mUserInfo.get(uid).uid == uid)) return;
 
         UserInfo publisher = createViewableUser(uid, false);
 
@@ -517,7 +524,7 @@ public class ChannelActivity extends AgoraBaseActivity {
         }
         mPublishersAdapter.updatePublishers(publishers);
     }
-
+    
     public void subscribePublisher(int uid, Media media, VideoLayout layout, StreamFormat format) {
         int mediaType = Constants.MEDIA_TYPE_NONE;
         int videoLayout = 0;
@@ -547,27 +554,35 @@ public class ChannelActivity extends AgoraBaseActivity {
             streamType = 1;
         }
 
-        ArrayList<UserInfo> publishers = getSmallVideoUser();
-        SurfaceView surfaceView = RtcEngine.CreateRendererView(this);
-        surfaceView.setZOrderOnTop(false);
-        surfaceView.setZOrderMediaOverlay(false);
+        UserInfo user = mUserInfo.get(uid);
+        user.hasSubscribed = true;
+        user.view.setZOrderOnTop(true);
+        user.view.setZOrderMediaOverlay(true);
 
-        UserInfo user = new UserInfo();
-        user.uid = uid;
-        user.isLocal = false;
-        user.hasSubscribed = false;
-        user.view = surfaceView;
-        publishers.add(user);
+        ArrayList<UserInfo> publishers = getSmallVideoUser();
+        Log.e(TAG, "start subscribe: " + publishers.size());
+        for (int i = 0; i < publishers.size(); ++i) {
+            Log.e(TAG, "uid: " + publishers.get(i).uid);
+        }
+        Log.e(TAG, "all user size: " + mUserInfo.size());
 
         mVideoAdapter.updateVideoData(publishers);
-        //UserInfo user = mUserInfo.get(uid);
+        //user.view.setZOrderOnTop(true);
         mSubscriber.subscribe(uid, mediaType, user.view, videoLayout, streamType);
         //setTranscoding(mCustomTranscoding);
-        //doRenderRemoteUi(Uid);
-        //SurfaceView surfaceView = mUidsList.get(Uid);
-        //Subscriber sub = new Subscriber(Uid, mediaType, surfaceView, videoLayout, streamType);
-        //mSubList.put(Uid, sub);
-        //worker().getLiveSubscriber().subscribe(Uid, mediaType, surfaceView, videoLayout, streamType);
-        //setTranscodingLayout(layout_transform);
+    }
+
+    private void processUnPublishForSubscriber(int host) {
+        mSubscriber.unsubscribe(host);
+        mUserInfo.remove(host);
+        mVideoAdapter.updateVideoData(getSmallVideoUser());
+
+        ArrayList<UrlData> publishers = new ArrayList<>();
+        ArrayList<UserInfo> users = getPublishers(false);
+        for (UserInfo user : users) {
+            UrlData data = new UrlData(user.uid + "", user.hasSubscribed, Media.AV, VideoLayout.Hideden, StreamFormat.High);
+            publishers.add(data);
+        }
+        mPublishersAdapter.updatePublishers(publishers);
     }
 }
