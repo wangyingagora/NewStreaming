@@ -3,6 +3,7 @@ package io.agora.streaming.ex;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -19,6 +20,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -37,6 +39,7 @@ import io.agora.live.LiveStats;
 import io.agora.live.LiveSubscriber;
 import io.agora.live.LiveSubscriberHandler;
 import io.agora.live.LiveTranscoding;
+import io.agora.propeller.Constant;
 import io.agora.rtc.Constants;
 import io.agora.rtc.RtcEngine;
 import io.agora.streaming.R;
@@ -95,7 +98,7 @@ public class ChannelActivity extends AgoraBaseActivity {
         });
 
         //mAllPublishers = new ArrayList<>();
-        mPublishersAdapter = new PublisherListAdapter(this, new ArrayList<UrlData>(), new SubscribeListener() {
+        mPublishersAdapter = new PublisherListAdapter(this, new ArrayList<SubscribeType>(), new SubscribeListener() {
             @Override
             public void subscribe(final int uid, final Media media, final VideoLayout layout, final StreamFormat format) {
                 subscribePublisher(uid, media, layout, format);
@@ -306,6 +309,14 @@ public class ChannelActivity extends AgoraBaseActivity {
             @Override
             public void onClick(View v) {
                 setTranscodingDialog();
+            }
+        });
+
+        ImageView mediaTypeView = findViewForId(R.id.action_media_type);
+        mediaTypeView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMediaTypeDialog();
             }
         });
 
@@ -562,15 +573,25 @@ public class ChannelActivity extends AgoraBaseActivity {
         alertDialog.show();
     }
 
+    private void showMediaTypeDialog() {
+        MediaTypeDialog dialog = new MediaTypeDialog();
+        dialog.showDialog(this, new MediaTypeDialog.OnMediaTypeChangedListener() {
+            @Override
+            public void onTypeChanged(Media type) {
+                setMediaType(type);
+            }
+        });
+    }
+
     private void addNewPublisher(int uid, int streamType) {
         if (mUserInfo.get(uid) != null && (mUserInfo.get(uid).uid == uid)) return;
 
         UserInfo publisher = createViewableUser(uid, false);
 
-        ArrayList<UrlData> publishers = new ArrayList<>();
+        ArrayList<SubscribeType> publishers = new ArrayList<>();
         ArrayList<UserInfo> users = getPublishers(false);
         for (UserInfo user : users) {
-            UrlData data = new UrlData(user.uid + "", user.hasSubscribed, Media.AV, VideoLayout.Hideden, StreamFormat.High);
+            SubscribeType data = new SubscribeType(user.uid + "", user.hasSubscribed, Media.AV, VideoLayout.Hidden, StreamFormat.High);
             publishers.add(data);
         }
         mPublishersAdapter.updatePublishers(publishers);
@@ -587,7 +608,7 @@ public class ChannelActivity extends AgoraBaseActivity {
             mediaType = Constants.MEDIA_TYPE_AUDIO_ONLY;
         } else if (media == Media.VIDEO) {
             mediaType = Constants.MEDIA_TYPE_VIDEO_ONLY;
-        } else if (media == Media.NONIE) {
+        } else if (media == Media.NONE) {
             mediaType = Constants.MEDIA_TYPE_NONE;
         }
 
@@ -595,7 +616,7 @@ public class ChannelActivity extends AgoraBaseActivity {
             videoLayout = 3;
         } else if (VideoLayout.Fit == layout) {
             videoLayout = 2;
-        } else if (VideoLayout.Hideden == layout) {
+        } else if (VideoLayout.Hidden == layout) {
             videoLayout = 1;
         }
 
@@ -628,10 +649,10 @@ public class ChannelActivity extends AgoraBaseActivity {
         mUserInfo.remove(host);
         mVideoAdapter.updateVideoData(getSmallVideoUser());
 
-        ArrayList<UrlData> publishers = new ArrayList<>();
+        ArrayList<SubscribeType> publishers = new ArrayList<>();
         ArrayList<UserInfo> users = getPublishers(false);
         for (UserInfo user : users) {
-            UrlData data = new UrlData(user.uid + "", user.hasSubscribed, Media.AV, VideoLayout.Hideden, StreamFormat.High);
+            SubscribeType data = new SubscribeType(user.uid + "", user.hasSubscribed, Media.AV, VideoLayout.Hidden, StreamFormat.High);
             publishers.add(data);
         }
         mPublishersAdapter.updatePublishers(publishers);
@@ -729,5 +750,33 @@ public class ChannelActivity extends AgoraBaseActivity {
                 sendMessage(message);
             }
         });
+    }
+
+    private void setMediaType(Media type) {
+        ImageView publishView = findViewForId(R.id.publish);
+        boolean isPublish = (boolean)publishView.getTag();
+
+        int mediaType;
+        if (type == Media.AV) {
+            mediaType = Constants.MEDIA_TYPE_AUDIO_AND_VIDEO;
+        } else if (type == Media.AUDIO) {
+            mediaType = Constants.MEDIA_TYPE_AUDIO_ONLY;
+        } else if (type == Media.VIDEO) {
+            mediaType = Constants.MEDIA_TYPE_VIDEO_ONLY;
+        } else {
+            mediaType = Constants.MEDIA_TYPE_NONE;
+        }
+
+        if (isPublish) {
+            mLivePublisher.setMediaType(mediaType);
+        }
+
+        for (HashMap.Entry<Integer, UserInfo> entry : mUserInfo.entrySet()) {
+            UserInfo user = entry.getValue();
+            if (user.isLocal || !user.hasSubscribed) {
+                continue;
+            }
+            mSubscriber.subscribe(user.uid, mediaType, user.view, user.renderMode, user.streamType);
+        }
     }
 }

@@ -19,9 +19,9 @@ import io.agora.streaming.R;
 public class PublisherListAdapter extends BaseAdapter {
     Context context;
     private LayoutInflater inflater;
-    ArrayList<UrlData> mData;
+    ArrayList<SubscribeType> mData;
     private SubscribeListener subscribeCallback;
-    public PublisherListAdapter(Context context, ArrayList<UrlData> data, SubscribeListener callback){
+    public PublisherListAdapter(Context context, ArrayList<SubscribeType> data, SubscribeListener callback){
         this.context = context;
         inflater = LayoutInflater.from(context);
         mData = data;
@@ -31,7 +31,7 @@ public class PublisherListAdapter extends BaseAdapter {
         this.subscribeCallback = callback;
     }
 
-    public void updatePublishers(ArrayList<UrlData> publishers) {
+    public void updatePublishers(ArrayList<SubscribeType> publishers) {
         if (publishers == null) {
             publishers = new ArrayList<>();
         }
@@ -45,7 +45,7 @@ public class PublisherListAdapter extends BaseAdapter {
     }
 
     @Override
-    public UrlData getItem(int position) {
+    public SubscribeType getItem(int position) {
         return mData.get(position);
     }
 
@@ -57,7 +57,7 @@ public class PublisherListAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Holder holder;
-        final UrlData data  = mData.get(position);
+        final SubscribeType data  = mData.get(position);
         if(convertView == null){
             holder = new Holder();
             convertView = inflater.inflate(R.layout.item_listview, null);
@@ -73,23 +73,23 @@ public class PublisherListAdapter extends BaseAdapter {
         }
 
         holder.mCheckBox.setOnClickListener(null);
-        holder.mCheckBox.setChecked(mData.get(position).mChecked);
+        holder.mCheckBox.setChecked(mData.get(position).isChecked);
         holder.mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!((CheckBox) v).isChecked()){
-                    mData.get(position).mChecked = false;
-                    subscribeCallback.unsubscribe(Integer.valueOf(mData.get(position).Url).intValue());
+                    mData.get(position).isChecked = false;
+                    subscribeCallback.unsubscribe(Integer.valueOf(mData.get(position).url).intValue());
                 } else {
-                    long uid = (Integer.valueOf(mData.get(position).Url).intValue() & 0xFFFFFFFFL);
+                    long uid = (Integer.valueOf(mData.get(position).url).intValue() & 0xFFFFFFFFL);
                     //Log.e("adam", "subscribeCallback uid is " + uid);
-                    subscribeCallback.subscribe(Integer.valueOf(mData.get(position).Url).intValue(), mData.get(position).mMeidia ,mData.get(position).mLayout, mData.get(position).mFormat);
-                    mData.get(position).mChecked = true;
+                    subscribeCallback.subscribe(Integer.valueOf(mData.get(position).url).intValue(), mData.get(position).mMeidia ,mData.get(position).mLayout, mData.get(position).mFormat);
+                    mData.get(position).isChecked = true;
                 }
             }
         });
 
-        long uidL = (Integer.valueOf(data.Url).intValue() & 0xFFFFFFFFL);
+        long uidL = (Integer.valueOf(data.url).intValue() & 0xFFFFFFFFL);
         holder.url.setText(uidL + "");
 
         holder.mStreamType.setOnCheckedChangeListener(null);
@@ -112,7 +112,7 @@ public class PublisherListAdapter extends BaseAdapter {
                     default:
                         break;
                 }
-                subscribeCallback.subscribe(Integer.valueOf(mData.get(position).Url).intValue(), mData.get(position).mMeidia, mData.get(position).mLayout, mData.get(position).mFormat);
+                subscribeCallback.subscribe(Integer.valueOf(mData.get(position).url).intValue(), mData.get(position).mMeidia, mData.get(position).mLayout, mData.get(position).mFormat);
             }
         });
 
@@ -124,7 +124,7 @@ public class PublisherListAdapter extends BaseAdapter {
             holder.mSetMediaType.check(R.id.media_type_audio);
         } else if(mData.get(position).mMeidia == Media.VIDEO) {
             holder.mSetMediaType.check(R.id.media_type_video);
-        } else if(mData.get(position).mMeidia == Media.NONIE){
+        } else if(mData.get(position).mMeidia == Media.NONE){
             holder.mSetMediaType.check(R.id.media_type_none);
         }
 
@@ -142,11 +142,11 @@ public class PublisherListAdapter extends BaseAdapter {
                         mData.get(position).mMeidia = Media.VIDEO;
                         break;
                     case R.id.media_type_none:
-                        mData.get(position).mMeidia = Media.NONIE;
+                        mData.get(position).mMeidia = Media.NONE;
                     default:
                         break;
                 }
-                subscribeCallback.subscribe(Integer.valueOf(mData.get(position).Url).intValue(), mData.get(position).mMeidia ,mData.get(position).mLayout, mData.get(position).mFormat);
+                subscribeCallback.subscribe(Integer.valueOf(mData.get(position).url).intValue(), mData.get(position).mMeidia ,mData.get(position).mLayout, mData.get(position).mFormat);
             }
 
         });
@@ -158,7 +158,7 @@ public class PublisherListAdapter extends BaseAdapter {
             holder.mSetVideoType.check(R.id.video_type_fit);
         } else if(mData.get(position).mLayout == VideoLayout.Adaptive){
             holder.mSetVideoType.check(R.id.video_type_adaptive);
-        } else if(mData.get(position).mLayout == VideoLayout.Hideden){
+        } else if(mData.get(position).mLayout == VideoLayout.Hidden){
             holder.mSetVideoType.check(R.id.video_type_hidden);
         }
 
@@ -167,7 +167,7 @@ public class PublisherListAdapter extends BaseAdapter {
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 switch (checkedId){
                     case R.id.video_type_hidden:
-                        mData.get(position).mLayout = VideoLayout.Hideden;
+                        mData.get(position).mLayout = VideoLayout.Hidden;
                         break;
                     case R.id.video_type_fit:
                         mData.get(position).mLayout = VideoLayout.Fit;
@@ -178,7 +178,7 @@ public class PublisherListAdapter extends BaseAdapter {
                     default:
                         break;
                 }
-                subscribeCallback.subscribe(Integer.valueOf(mData.get(position).Url).intValue(), mData.get(position).mMeidia ,mData.get(position).mLayout, mData.get(position).mFormat);
+                subscribeCallback.subscribe(Integer.valueOf(mData.get(position).url).intValue(), mData.get(position).mMeidia ,mData.get(position).mLayout, mData.get(position).mFormat);
             }
         });
 

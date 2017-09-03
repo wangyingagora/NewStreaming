@@ -7,11 +7,11 @@ enum Media {
     AV,
     AUDIO,
     VIDEO,
-    NONIE
+    NONE
 };
 
 enum VideoLayout{
-    Hideden,
+    Hidden,
     Fit,
     Adaptive
 };
@@ -21,18 +21,18 @@ enum StreamFormat{
     Low
 };
 
-public class UrlData {
-    String Url;
-    boolean mChecked;
+public class SubscribeType {
+    String url;
+    boolean isChecked;
     Media mMeidia;
     VideoLayout mLayout;
     StreamFormat mFormat;
-    UrlData(String url){
-        Url = url;
+    SubscribeType(String url){
+        this.url = url;
     }
-    UrlData(String url, boolean checked, Media media, VideoLayout layout, StreamFormat format){
-        Url = url;
-        mChecked = checked;
+    SubscribeType(String url, boolean checked, Media media, VideoLayout layout, StreamFormat format){
+        this.url = url;
+        isChecked = checked;
         mMeidia = media;
         mLayout = layout;
         mFormat = format;

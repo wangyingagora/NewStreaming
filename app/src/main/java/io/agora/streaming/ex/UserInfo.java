@@ -11,6 +11,8 @@ public class UserInfo {
     boolean isLocal;
     SurfaceView view;
     boolean hasSubscribed;
+    int renderMode;
+    int streamType;
 
     public boolean isLocal() {
         return isLocal;
