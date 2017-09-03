@@ -3,7 +3,6 @@ package io.agora.streaming.ex;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -20,7 +19,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -39,7 +37,6 @@ import io.agora.live.LiveStats;
 import io.agora.live.LiveSubscriber;
 import io.agora.live.LiveSubscriberHandler;
 import io.agora.live.LiveTranscoding;
-import io.agora.propeller.Constant;
 import io.agora.rtc.Constants;
 import io.agora.rtc.RtcEngine;
 import io.agora.streaming.R;
@@ -74,7 +71,6 @@ public class ChannelActivity extends AgoraBaseActivity {
     private RecyclerView mVideoListView;
     private VideoAdapter mVideoAdapter;
 
-    //private ArrayList<UrlData> mAllPublishers;
     private PublisherListAdapter mPublishersAdapter;
 
     private InChannelMessageListAdapter mMessageAdapter;
@@ -97,7 +93,6 @@ public class ChannelActivity extends AgoraBaseActivity {
             }
         });
 
-        //mAllPublishers = new ArrayList<>();
         mPublishersAdapter = new PublisherListAdapter(this, new ArrayList<SubscribeType>(), new SubscribeListener() {
             @Override
             public void subscribe(final int uid, final Media media, final VideoLayout layout, final StreamFormat format) {
