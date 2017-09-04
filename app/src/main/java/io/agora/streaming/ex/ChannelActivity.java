@@ -140,6 +140,9 @@ public class ChannelActivity extends AgoraBaseActivity {
         mCustomTranscoding.height = height;
         mCustomTranscoding.bitrate = bitrate;
         mCustomTranscoding.layout = CustomTranscoding.LAYOUT_DEFAULT;
+        if (mCustomTranscoding.framerate == 0) {
+            mCustomTranscoding.framerate = 15;
+        }
     }
 
     private void initEngine(String channelName, boolean enableVideo) {
@@ -187,12 +190,12 @@ public class ChannelActivity extends AgoraBaseActivity {
 
             @Override
             public void onConnectionInterrupted() {
-                Log.e(TAG, "onConnectionInterrupted");
+                sendMessageOnMainThread(new Message(new User(mMyselfId, String.valueOf(mMyselfId)), new String("connection interrupted")));
             }
 
             @Override
             public void onConnectionLost() {
-                Log.e(TAG, "onConnectionLost");
+                sendMessageOnMainThread(new Message(new User(mMyselfId, String.valueOf(mMyselfId)), new String("connection lost")));
             }
 
             @Override
@@ -407,6 +410,8 @@ public class ChannelActivity extends AgoraBaseActivity {
             localUser.view.setLayoutParams(params);
             localUser.view.setZOrderOnTop(false);
             mInnerLayout.addView(localUser.view);
+
+            mLivePublisher.setVideoProfile(mCustomTranscoding.width, mCustomTranscoding.width, mCustomTranscoding.framerate, mCustomTranscoding.bitrate);
             mLiveEngine.startPreview(localUser.view, Constants.RENDER_MODE_HIDDEN);
             mLivePublisher.publishWithPermissionKey("");
         } else {
