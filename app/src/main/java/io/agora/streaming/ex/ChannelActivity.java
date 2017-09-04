@@ -126,6 +126,7 @@ public class ChannelActivity extends AgoraBaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mLiveEngine.destroy();
     }
 
     private void initTranscoding(int width, int height, int bitrate) {
