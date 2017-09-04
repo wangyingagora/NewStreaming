@@ -360,6 +360,12 @@ public class ChannelActivity extends AgoraBaseActivity {
 
 
         mVideoAdapter = new VideoAdapter(this, Utils.getSmallVideoUser(mUserInfo, mBigUserId));
+        mVideoAdapter.setOnVideoViewClickedListener(new VideoAdapter.OnVideoViewClickedListener() {
+            @Override
+            public void onVideoViewClicked(int uid) {
+
+            }
+        });
         mVideoListView.setLayoutManager(gridLayoutManager);
         mVideoListView.setAdapter(mVideoAdapter);
 

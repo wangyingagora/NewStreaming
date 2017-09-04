@@ -13,9 +13,7 @@ import android.widget.FrameLayout;
 import java.util.ArrayList;
 
 import io.agora.streaming.R;
-import io.agora.streaming.model.User;
 import io.agora.streaming.utils.DeviceUtils;
-import io.agora.streaming.utils.Utils;
 
 /**
  * Created by eaglewangy on 02/09/2017.
@@ -26,6 +24,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
     private Context mContext;
     private ArrayList<UserInfo> mUsers;
+    private OnVideoViewClickedListener mListener;
 
     public VideoAdapter(Context context, ArrayList<UserInfo> users) {
         mContext = context;
@@ -43,6 +42,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
+    public void setOnVideoViewClickedListener(OnVideoViewClickedListener listener) {
+        mListener = listener;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ViewGroup view = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.small_video_item, parent, false);
@@ -58,7 +61,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        UserInfo user = mUsers.get(position);
+        final UserInfo user = mUsers.get(position);
         SurfaceView surfaceView = user.view;
         if (surfaceView.getParent() != null) {
             ((ViewManager)surfaceView.getParent()).removeView(surfaceView);
@@ -66,6 +69,14 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         surfaceView.setLayoutParams(params);
         holder.rootView.addView(surfaceView);
+        holder.rootView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    mListener.onVideoViewClicked(user.uid);
+                }
+            }
+        });
     }
 
     @Override
@@ -91,5 +102,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
             rootView = (FrameLayout) itemView;
             rootView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.MATCH_PARENT));
         }
+    }
+
+    public interface OnVideoViewClickedListener {
+        public void onVideoViewClicked(int uid);
     }
 }
