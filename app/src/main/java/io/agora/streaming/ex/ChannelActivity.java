@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -565,6 +567,9 @@ public class ChannelActivity extends AgoraBaseActivity {
             bigUser.view.setZOrderOnTop(false);
             bigUser.view.setZOrderMediaOverlay(false);
             mInnerLayout.removeAllViews();
+            if (bigUser.view.getParent() != null) {
+                ((ViewManager)bigUser.view.getParent()).removeView(bigUser.view);
+            }
             mInnerLayout.addView(bigUser.view);
             smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
             mVideoAdapter.updateVideoData(smallVideoUsers);
@@ -577,20 +582,25 @@ public class ChannelActivity extends AgoraBaseActivity {
             bigUser.view.setZOrderOnTop(false);
             bigUser.view.setZOrderMediaOverlay(false);
             mInnerLayout.removeAllViews();
-            mInnerLayout.addView(bigUser.view);
+            if (bigUser.view.getParent() != null) {
+                ((ViewManager)bigUser.view.getParent()).removeView(bigUser.view);
+            }
+            mOuterTopLayout.addView(bigUser.view);
             smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
             mVideoAdapter.updateVideoData(smallVideoUsers);
         } else if(layout == CustomTranscoding.LAYOUT_MATRIX){
-            mOuterTopLayout.setVisibility(View.GONE);
             mVideoListView.setVisibility(View.VISIBLE);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT);
             bigUser.view.setLayoutParams(params);
-            bigUser.view.setZOrderOnTop(false);
-            bigUser.view.setZOrderMediaOverlay(false);
+            bigUser.view.setZOrderOnTop(true);
+            bigUser.view.setZOrderMediaOverlay(true);
             mInnerLayout.removeAllViews();
-            mInnerLayout.addView(bigUser.view);
+            mOuterTopLayout.removeAllViews();
+            //mInnerLayout.addView(bigUser.view);
+            mOuterTopLayout.setVisibility(View.GONE);
             smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
+            smallVideoUsers.add(mUserInfo.get(mBigUserId));
             mVideoAdapter.updateVideoData(smallVideoUsers);
         }
 
