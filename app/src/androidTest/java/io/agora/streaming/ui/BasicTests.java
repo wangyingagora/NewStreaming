@@ -7,6 +7,7 @@ import com.robotium.solo.Solo;
 
 import io.agora.streaming.BuildConfig;
 import io.agora.streaming.R;
+import io.agora.streaming.ex.MainActivity;
 
 public class BasicTests extends ActivityInstrumentationTestCase2<MainActivity> {
 

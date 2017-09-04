@@ -42,7 +42,6 @@ import io.agora.live.LiveTranscoding;
 import io.agora.rtc.Constants;
 import io.agora.rtc.RtcEngine;
 import io.agora.streaming.R;
-import io.agora.streaming.model.ConstantApp;
 import io.agora.streaming.model.Message;
 import io.agora.streaming.model.User;
 import io.agora.streaming.ui.InChannelMessageListAdapter;
@@ -115,12 +114,12 @@ public class ChannelActivity extends AgoraBaseActivity {
 
         Intent intent = getIntent();
 
-        boolean enableVideo = intent.getBooleanExtra(ConstantApp.ACTION_ENABLE_VIDEO, true);
-        String channelName = intent.getStringExtra(ConstantApp.ACTION_KEY_CHANNEL_NAME);
+        boolean enableVideo = intent.getBooleanExtra(AgoraConstans.ACTION_ENABLE_VIDEO, true);
+        String channelName = intent.getStringExtra(AgoraConstans.ACTION_KEY_CHANNEL_NAME);
 
-        int width = intent.getIntExtra(ConstantApp.ACTION_TRANSFORM_WIDTH, 0);
-        int height =  intent.getIntExtra(ConstantApp.ACTION_TRANSFORM_HEIGHT , 0);
-        int bitrate = intent.getIntExtra(ConstantApp.ACTION_TRANSFORM_BITRATE, 0);
+        int width = intent.getIntExtra(AgoraConstans.ACTION_TRANSFORM_WIDTH, 0);
+        int height =  intent.getIntExtra(AgoraConstans.ACTION_TRANSFORM_HEIGHT , 0);
+        int bitrate = intent.getIntExtra(AgoraConstans.ACTION_TRANSFORM_BITRATE, 0);
         initTranscoding(width, height, bitrate);
 
         initEngine(channelName, enableVideo);

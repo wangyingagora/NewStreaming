@@ -1,9 +1,8 @@
-package io.agora.streaming.ui;
+package io.agora.streaming.ex;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,8 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import io.agora.streaming.R;
-import io.agora.streaming.ex.AgoraBaseActivity;
-import io.agora.streaming.model.ConstantApp;
+import io.agora.streaming.ui.VideoProfileAdapter;
 
 public class SettingsActivity extends AgoraBaseActivity {
     private final static String TAG = SettingsActivity.class.getSimpleName();
@@ -43,7 +41,7 @@ public class SettingsActivity extends AgoraBaseActivity {
         //v_profiles.setHasFixedSize(true);
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        int prefIndex = pref.getInt(ConstantApp.PrefManager.PREF_PROPERTY_PROFILE_IDX, ConstantApp.DEFAULT_PROFILE_IDX);
+        int prefIndex = pref.getInt(AgoraConstans.PrefManager.PREF_PROPERTY_PROFILE_IDX, AgoraConstans.DEFAULT_PROFILE_IDX);
 
         mVideoProfileAdapter = new VideoProfileAdapter(this, prefIndex);
         //mVideoProfileAdapter.setHasStableIds(true);
@@ -82,7 +80,7 @@ public class SettingsActivity extends AgoraBaseActivity {
         Log.e("adam", " profileIndex is " + profileIndex);
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = pref.edit();
-        editor.putInt(ConstantApp.PrefManager.PREF_PROPERTY_PROFILE_IDX, profileIndex);
+        editor.putInt(AgoraConstans.PrefManager.PREF_PROPERTY_PROFILE_IDX, profileIndex);
         editor.apply();
 
         String resolution = getResources().getStringArray(R.array.string_array_resolutions)[profileIndex];

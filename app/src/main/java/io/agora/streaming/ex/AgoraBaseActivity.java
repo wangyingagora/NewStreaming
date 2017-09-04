@@ -15,8 +15,6 @@ import android.widget.Toast;
 
 import java.util.Arrays;
 
-import io.agora.streaming.model.ConstantApp;
-
 /**
  * Created by eaglewangy on 31/08/2017.
  */
@@ -45,9 +43,9 @@ public class AgoraBaseActivity extends AppCompatActivity {
     }
 
     private boolean checkSelfPermissions() {
-        return checkSelfPermission(Manifest.permission.RECORD_AUDIO, ConstantApp.PERMISSION_REQ_ID_RECORD_AUDIO) &&
-                checkSelfPermission(Manifest.permission.CAMERA, ConstantApp.PERMISSION_REQ_ID_CAMERA) &&
-                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, ConstantApp.PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE);
+        return checkSelfPermission(Manifest.permission.RECORD_AUDIO, AgoraConstans.PERMISSION_REQ_ID_RECORD_AUDIO) &&
+                checkSelfPermission(Manifest.permission.CAMERA, AgoraConstans.PERMISSION_REQ_ID_CAMERA) &&
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, AgoraConstans.PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE);
     }
     protected <T> T findViewForId(@IdRes int resId) {
         return (T)findViewById(resId);
@@ -80,26 +78,26 @@ public class AgoraBaseActivity extends AppCompatActivity {
                                            @NonNull String permissions[], @NonNull int[] grantResults) {
         Log.d(TAG, "onRequestPermissionsResult " + requestCode + " " + Arrays.toString(permissions) + " " + Arrays.toString(grantResults));
         switch (requestCode) {
-            case ConstantApp.PERMISSION_REQ_ID_RECORD_AUDIO: {
+            case AgoraConstans.PERMISSION_REQ_ID_RECORD_AUDIO: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkSelfPermission(Manifest.permission.CAMERA, ConstantApp.PERMISSION_REQ_ID_CAMERA);
+                    checkSelfPermission(Manifest.permission.CAMERA, AgoraConstans.PERMISSION_REQ_ID_CAMERA);
                 } else {
                     finish();
                 }
                 break;
             }
-            case ConstantApp.PERMISSION_REQ_ID_CAMERA: {
+            case AgoraConstans.PERMISSION_REQ_ID_CAMERA: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, ConstantApp.PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE);
+                    checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, AgoraConstans.PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE);
                     //((AGApplication) getApplication()).initWorkerThread();
                 } else {
                     finish();
                 }
                 break;
             }
-            case ConstantApp.PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE: {
+            case AgoraConstans.PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 } else {

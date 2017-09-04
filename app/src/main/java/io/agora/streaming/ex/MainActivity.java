@@ -1,4 +1,4 @@
-package io.agora.streaming.ui;
+package io.agora.streaming.ex;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,16 +14,10 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.RadioGroup;
-import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Spinner;
 
 import io.agora.streaming.R;
-import io.agora.streaming.ex.AgoraBaseActivity;
-import io.agora.streaming.ex.ChannelActivity;
-import io.agora.streaming.model.ConstantApp;
 
 public class MainActivity extends AgoraBaseActivity {
     private CheckBox mEnableBox;
@@ -145,13 +139,13 @@ public class MainActivity extends AgoraBaseActivity {
         //vSettings().mEncryptionKey = encryption;
 
         Intent i = new Intent(MainActivity.this, ChannelActivity.class);
-        i.putExtra(ConstantApp.ACTION_KEY_CHANNEL_NAME, channel);
-        i.putExtra(ConstantApp.ACTION_KEY_ENCRYPTION_KEY, encryption);
+        i.putExtra(AgoraConstans.ACTION_KEY_CHANNEL_NAME, channel);
+        i.putExtra(AgoraConstans.ACTION_KEY_ENCRYPTION_KEY, encryption);
         //i.putExtra(ConstantApp.ACTION_KEY_ENCRYPTION_MODE, getResources().getStringArray(R.array.encryption_mode_values)[vSettings().mEncryptionModeIndex]);
-        i.putExtra(ConstantApp.ACTION_ENABLE_VIDEO , mEnableVideo);
-        i.putExtra(ConstantApp.ACTION_TRANSFORM_WIDTH, mWidth);
-        i.putExtra(ConstantApp.ACTION_TRANSFORM_HEIGHT, mHeight);
-        i.putExtra(ConstantApp.ACTION_TRANSFORM_BITRATE, mBitRate);
+        i.putExtra(AgoraConstans.ACTION_ENABLE_VIDEO , mEnableVideo);
+        i.putExtra(AgoraConstans.ACTION_TRANSFORM_WIDTH, mWidth);
+        i.putExtra(AgoraConstans.ACTION_TRANSFORM_HEIGHT, mHeight);
+        i.putExtra(AgoraConstans.ACTION_TRANSFORM_BITRATE, mBitRate);
         startActivity(i);
     }
 

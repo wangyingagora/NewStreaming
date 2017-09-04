@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 
-import io.agora.streaming.model.ConstantApp;
+import io.agora.streaming.ex.AgoraConstans;
 import io.agora.propeller.UserStatusData;
 
 public class GridVideoViewContainerAdapter extends VideoViewAdapter {
@@ -73,8 +73,8 @@ public class GridVideoViewContainerAdapter extends VideoViewAdapter {
     @Override
     public int getItemCount() {
         int sizeLimit = mUsers.size();
-        if (sizeLimit >= ConstantApp.MAX_PEER_COUNT + 1) {
-            sizeLimit = ConstantApp.MAX_PEER_COUNT + 1;
+        if (sizeLimit >= AgoraConstans.MAX_PEER_COUNT + 1) {
+            sizeLimit = AgoraConstans.MAX_PEER_COUNT + 1;
         }
         return sizeLimit;
     }
