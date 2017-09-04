@@ -76,6 +76,8 @@ public class ChannelActivity extends AgoraBaseActivity {
     private InChannelMessageListAdapter mMessageAdapter;
     private ArrayList<Message> mMessageList;
 
+    private int mBigUserId;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,7 +106,8 @@ public class ChannelActivity extends AgoraBaseActivity {
                 mSubscriber.unsubscribe(uid);
                 //mUserInfo.remove(uid);
                 mUserInfo.get(uid).hasSubscribed = false;
-                mVideoAdapter.updateVideoData(getSmallVideoUser());
+                //mVideoAdapter.updateVideoData(getSmallVideoUser());
+                relayoutTranscoding(mCustomTranscoding.layout);
             }
         });
 
@@ -157,6 +160,7 @@ public class ChannelActivity extends AgoraBaseActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        mBigUserId = uid;
                         createViewableUser(uid, true);
                         updateUI(channel);
                     }
@@ -353,7 +357,7 @@ public class ChannelActivity extends AgoraBaseActivity {
         */
 
 
-        mVideoAdapter = new VideoAdapter(this, getSmallVideoUser());
+        mVideoAdapter = new VideoAdapter(this, Utils.getSmallVideoUser(mUserInfo, mBigUserId));
         mVideoListView.setLayoutManager(gridLayoutManager);
         mVideoListView.setAdapter(mVideoAdapter);
 
@@ -480,13 +484,14 @@ public class ChannelActivity extends AgoraBaseActivity {
         return user;
     }
 
+    /*
     private ArrayList<UserInfo> getSmallVideoUser() {
         ArrayList<UserInfo> users = new ArrayList<>();
         if (mCustomTranscoding.layout == CustomTranscoding.LAYOUT_DEFAULT) {
         } else if (mCustomTranscoding.layout == CustomTranscoding.LAYOUT_FLOAT) {
-            users = getPublishers(true);
+            users = Utils.getPublishers(mUserInfo, true);
         } else if (mCustomTranscoding.layout == CustomTranscoding.LAYOUT_TITLE) {
-            users = getPublishers(true);
+            users = Utils.getPublishers(mUserInfo, true);
         } else if (mCustomTranscoding.layout == CustomTranscoding.LAYOUT_MATRIX) {
             Iterator<Map.Entry<Integer, UserInfo>> itrMap = mUserInfo.entrySet().iterator();
             while (itrMap.hasNext()) {
@@ -500,25 +505,7 @@ public class ChannelActivity extends AgoraBaseActivity {
         }
         return users;
     }
-
-    private ArrayList<UserInfo> getPublishers(boolean isOnlySubscribed) {
-        ArrayList<UserInfo> users = new ArrayList<>();
-        Iterator<Map.Entry<Integer, UserInfo>> iterator = mUserInfo.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Integer, UserInfo> entry = iterator.next();
-            UserInfo user = entry.getValue();
-            if (user.isLocal) {
-                continue;
-            }
-            if (isOnlySubscribed) {
-                if (!user.hasSubscribed) {
-                    continue;
-                }
-            }
-            users.add(user);
-        }
-        return users;
-    }
+    */
 
     private void showTransCodingSettingDialog() {
         CustomTranscodingDialog dialog = new CustomTranscodingDialog(this, mCustomTranscoding);
@@ -537,22 +524,83 @@ public class ChannelActivity extends AgoraBaseActivity {
             return;
         }
         ArrayList<LiveTranscoding.TranscodingUser> transcodingUsers = null;
-        ArrayList<UserInfo> smallVideoUsers = getSmallVideoUser();
+        ArrayList<UserInfo> smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
         if (mTransCoding.layout == CustomTranscoding.LAYOUT_DEFAULT) {
             transcodingUsers = null;
         } else if(mTransCoding.layout == CustomTranscoding.LAYOUT_FLOAT){
-            transcodingUsers = TranscodingLayoutEx.floatLayout(mMyselfId, smallVideoUsers, 0, mTransCoding.width, mTransCoding.height);
+            transcodingUsers = TranscodingLayoutEx.floatLayout(mBigUserId, smallVideoUsers, 0, mTransCoding.width, mTransCoding.height);
         } else if(mTransCoding.layout == CustomTranscoding.LAYOUT_TITLE){
-            transcodingUsers = TranscodingLayoutEx.titleLayout(mMyselfId, smallVideoUsers, 0, mTransCoding.width, mTransCoding.height);
+            transcodingUsers = TranscodingLayoutEx.titleLayout(mBigUserId, smallVideoUsers, 0, mTransCoding.width, mTransCoding.height);
         } else if(mTransCoding.layout == CustomTranscoding.LAYOUT_MATRIX){
             transcodingUsers = TranscodingLayoutEx.martixLayout(mMyselfId, smallVideoUsers, 0, mTransCoding.width, mTransCoding.height);
         }
 
         mTransCoding.setUsers(transcodingUsers);
+        //mVideoAdapter.updateVideoData(smallVideoUsers);
+        mLivePublisher.setLiveTranscoding(mTransCoding);
+
+        relayoutTranscoding(mTransCoding.layout);
+    }
+
+    private void relayoutTranscoding(int layout) {
+        ArrayList<UserInfo> smallVideoUsers = new ArrayList<>();
+        UserInfo bigUser = mUserInfo.get(mBigUserId);
+        if (layout == CustomTranscoding.LAYOUT_DEFAULT) {
+            mOuterTopLayout.setVisibility(View.GONE);
+            mVideoListView.setVisibility(View.GONE);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            bigUser.view.setLayoutParams(params);
+            bigUser.view.setZOrderOnTop(false);
+            bigUser.view.setZOrderMediaOverlay(false);
+            mInnerLayout.removeAllViews();
+            mInnerLayout.addView(bigUser.view);
+            mVideoAdapter.updateVideoData(smallVideoUsers);
+        } else if(layout == CustomTranscoding.LAYOUT_FLOAT){
+            mOuterTopLayout.setVisibility(View.GONE);
+            mVideoListView.setVisibility(View.VISIBLE);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            bigUser.view.setLayoutParams(params);
+            bigUser.view.setZOrderOnTop(false);
+            bigUser.view.setZOrderMediaOverlay(false);
+            mInnerLayout.removeAllViews();
+            mInnerLayout.addView(bigUser.view);
+            smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
+            mVideoAdapter.updateVideoData(smallVideoUsers);
+        } else if(layout == CustomTranscoding.LAYOUT_TITLE){
+            mOuterTopLayout.setVisibility(View.VISIBLE);
+            mVideoListView.setVisibility(View.VISIBLE);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            bigUser.view.setLayoutParams(params);
+            bigUser.view.setZOrderOnTop(false);
+            bigUser.view.setZOrderMediaOverlay(false);
+            mInnerLayout.removeAllViews();
+            mInnerLayout.addView(bigUser.view);
+            smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
+            mVideoAdapter.updateVideoData(smallVideoUsers);
+        } else if(layout == CustomTranscoding.LAYOUT_MATRIX){
+            mOuterTopLayout.setVisibility(View.GONE);
+            mVideoListView.setVisibility(View.VISIBLE);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            bigUser.view.setLayoutParams(params);
+            bigUser.view.setZOrderOnTop(false);
+            bigUser.view.setZOrderMediaOverlay(false);
+            mInnerLayout.removeAllViews();
+            mInnerLayout.addView(bigUser.view);
+            smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
+            mVideoAdapter.updateVideoData(smallVideoUsers);
+        }
+
+        for (int i = 0; i < smallVideoUsers.size(); ++i) {
+            smallVideoUsers.get(i).view.setZOrderOnTop(true);
+            smallVideoUsers.get(i).view.setZOrderMediaOverlay(true);
+        }
 
         mVideoAdapter.updateVideoData(smallVideoUsers);
 
-        mLivePublisher.setLiveTranscoding(mTransCoding);
     }
 
     private void showPublisherList() {
@@ -585,7 +633,7 @@ public class ChannelActivity extends AgoraBaseActivity {
         UserInfo publisher = createViewableUser(uid, false);
 
         ArrayList<SubscribeType> publishers = new ArrayList<>();
-        ArrayList<UserInfo> users = getPublishers(false);
+        ArrayList<UserInfo> users = Utils.getPublishers(mUserInfo, false);
         for (UserInfo user : users) {
             SubscribeType data = new SubscribeType(user.uid + "", user.hasSubscribed, Media.AV, VideoLayout.Hidden, StreamFormat.High);
             publishers.add(data);
@@ -627,11 +675,11 @@ public class ChannelActivity extends AgoraBaseActivity {
         user.view.setZOrderOnTop(true);
         user.view.setZOrderMediaOverlay(true);
 
-        ArrayList<UserInfo> publishers = getSmallVideoUser();
-        Log.e(TAG, "start subscribe: " + publishers.size());
-        for (int i = 0; i < publishers.size(); ++i) {
-            Log.e(TAG, "uid: " + publishers.get(i).uid);
-        }
+        ArrayList<UserInfo> publishers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
+//        Log.e(TAG, "start subscribe: " + publishers.size());
+//        for (int i = 0; i < publishers.size(); ++i) {
+//            Log.e(TAG, "uid: " + publishers.get(i).uid);
+//        }
         Log.e(TAG, "all user size: " + mUserInfo.size());
 
         mVideoAdapter.updateVideoData(publishers);
@@ -643,10 +691,11 @@ public class ChannelActivity extends AgoraBaseActivity {
     private void processUnPublishForSubscriber(int host) {
         mSubscriber.unsubscribe(host);
         mUserInfo.remove(host);
-        mVideoAdapter.updateVideoData(getSmallVideoUser());
+        //mVideoAdapter.updateVideoData(getSmallVideoUser());
+        relayoutTranscoding(mCustomTranscoding.layout);
 
         ArrayList<SubscribeType> publishers = new ArrayList<>();
-        ArrayList<UserInfo> users = getPublishers(false);
+        ArrayList<UserInfo> users = Utils.getPublishers(mUserInfo, false);
         for (UserInfo user : users) {
             SubscribeType data = new SubscribeType(user.uid + "", user.hasSubscribed, Media.AV, VideoLayout.Hidden, StreamFormat.High);
             publishers.add(data);

@@ -7,12 +7,12 @@ import android.view.SurfaceView;
  */
 
 public class UserInfo {
-    int uid;
-    boolean isLocal;
-    SurfaceView view;
-    boolean hasSubscribed;
-    int renderMode;
-    int streamType;
+    public int uid;
+    public boolean isLocal;
+    public SurfaceView view;
+    public boolean hasSubscribed;
+    public int renderMode;
+    public int streamType;
 
     public boolean isLocal() {
         return isLocal;

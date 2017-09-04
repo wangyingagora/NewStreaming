@@ -5,8 +5,13 @@ import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import io.agora.streaming.ex.UserInfo;
 
 /**
  * Created by eaglewangy on 25/08/2017.
@@ -53,5 +58,39 @@ public class Utils {
 
     public static String getStreamUrl(String room) {
         return "rtmp://vid-130451.push.fastweb.broadcastapp.agoraio.cn/live/" + room;
+    }
+
+    public static ArrayList<UserInfo> getPublishers(Map<Integer, UserInfo> userInfo, boolean isOnlySubscribed) {
+        ArrayList<UserInfo> users = new ArrayList<>();
+        Iterator<Map.Entry<Integer, UserInfo>> iterator = userInfo.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, UserInfo> entry = iterator.next();
+            UserInfo user = entry.getValue();
+            if (user.isLocal) {
+                continue;
+            }
+            if (isOnlySubscribed) {
+                if (!user.hasSubscribed) {
+                    continue;
+                }
+            }
+            users.add(user);
+        }
+        return users;
+    }
+
+    public static ArrayList<UserInfo> getSmallVideoUser(Map<Integer, UserInfo> userInfo, int bigUserId) {
+        ArrayList<UserInfo> users = new ArrayList<>();
+        Iterator<Map.Entry<Integer, UserInfo>> iterator = userInfo.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, UserInfo> entry = iterator.next();
+            UserInfo user = entry.getValue();
+            if (user.uid == bigUserId) {
+                continue;
+            }
+
+            users.add(user);
+        }
+        return users;
     }
 }
