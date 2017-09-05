@@ -14,8 +14,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -408,6 +406,9 @@ public class ChannelActivity extends AgoraBaseActivity {
                     LinearLayout.LayoutParams.MATCH_PARENT);
             localUser.view.setLayoutParams(params);
             localUser.view.setZOrderOnTop(false);
+            if (localUser.view.getParent() != null) {
+                Utils.removeViewFromParent(localUser.view);
+            }
             mInnerLayout.addView(localUser.view);
 
             mLivePublisher.setVideoProfile(mCustomTranscoding.width, mCustomTranscoding.width, mCustomTranscoding.framerate, mCustomTranscoding.bitrate);
@@ -417,9 +418,15 @@ public class ChannelActivity extends AgoraBaseActivity {
             view.setTag(false);
             view.clearColorFilter();
             mLivePublisher.unpublish();
+            /*
+            ArrayList<UserInfo> smallUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
+            for (UserInfo user : smallUsers) {
+                int uid = user.uid;
+                mSubscriber.unsubscribe(user.uid);
+                mUserInfo.get(uid).hasSubscribed = false;
+            }
+            */
             mLiveEngine.stopPreview();
-            //RelativeLayout containerView = findViewForId(R.id.container);
-            //containerView.removeAllViews();
             mInnerLayout.removeAllViews();
         }
     }
@@ -559,15 +566,23 @@ public class ChannelActivity extends AgoraBaseActivity {
         UserInfo bigUser = mUserInfo.get(mBigUserId);
         if (layout == CustomTranscoding.LAYOUT_DEFAULT) {
             mOuterTopLayout.setVisibility(View.GONE);
-            mVideoListView.setVisibility(View.GONE);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT);
             bigUser.view.setLayoutParams(params);
             bigUser.view.setZOrderOnTop(false);
             bigUser.view.setZOrderMediaOverlay(false);
             mInnerLayout.removeAllViews();
+            if (bigUser.view.getParent() != null) {
+                Utils.removeViewFromParent(bigUser.view);
+            }
             mInnerLayout.addView(bigUser.view);
-            mVideoAdapter.updateVideoData(smallVideoUsers);
+            Log.e(TAG, "Default small size: " + smallVideoUsers.size());
+            ArrayList<UserInfo> tmp = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
+            for (int i = 0; i < tmp.size(); ++i) {
+                Utils.removeViewFromParent(tmp.get(i).view);
+            }
+            mVideoListView.setVisibility(View.GONE);
+            //mVideoAdapter.updateVideoData(smallVideoUsers);
         } else if(layout == CustomTranscoding.LAYOUT_FLOAT){
             mOuterTopLayout.setVisibility(View.GONE);
             mVideoListView.setVisibility(View.VISIBLE);
@@ -578,11 +593,11 @@ public class ChannelActivity extends AgoraBaseActivity {
             bigUser.view.setZOrderMediaOverlay(false);
             mInnerLayout.removeAllViews();
             if (bigUser.view.getParent() != null) {
-                ((ViewManager)bigUser.view.getParent()).removeView(bigUser.view);
+                Utils.removeViewFromParent(bigUser.view);
             }
             mInnerLayout.addView(bigUser.view);
             smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
-            mVideoAdapter.updateVideoData(smallVideoUsers);
+           // mVideoAdapter.updateVideoData(smallVideoUsers);
         } else if(layout == CustomTranscoding.LAYOUT_TITLE){
             mOuterTopLayout.setVisibility(View.VISIBLE);
             mVideoListView.setVisibility(View.VISIBLE);
@@ -593,11 +608,11 @@ public class ChannelActivity extends AgoraBaseActivity {
             bigUser.view.setZOrderMediaOverlay(false);
             mInnerLayout.removeAllViews();
             if (bigUser.view.getParent() != null) {
-                ((ViewManager)bigUser.view.getParent()).removeView(bigUser.view);
+                Utils.removeViewFromParent(bigUser.view);
             }
             mOuterTopLayout.addView(bigUser.view);
             smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
-            mVideoAdapter.updateVideoData(smallVideoUsers);
+            //mVideoAdapter.updateVideoData(smallVideoUsers);
         } else if(layout == CustomTranscoding.LAYOUT_MATRIX){
             mVideoListView.setVisibility(View.VISIBLE);
             /*
@@ -610,12 +625,12 @@ public class ChannelActivity extends AgoraBaseActivity {
             mInnerLayout.removeAllViews();
             mOuterTopLayout.removeAllViews();
             if (bigUser.view.getParent() != null) {
-                ((ViewManager)bigUser.view.getParent()).removeView(bigUser.view);
+                Utils.removeViewFromParent(bigUser.view);
             }
             mOuterTopLayout.setVisibility(View.GONE);
             smallVideoUsers = Utils.getSmallVideoUser(mUserInfo, mBigUserId);
             smallVideoUsers.add(mUserInfo.get(mBigUserId));
-            mVideoAdapter.updateVideoData(smallVideoUsers);
+           // mVideoAdapter.updateVideoData(smallVideoUsers);
         }
 
         for (int i = 0; i < smallVideoUsers.size(); ++i) {
@@ -623,6 +638,7 @@ public class ChannelActivity extends AgoraBaseActivity {
             smallVideoUsers.get(i).view.setZOrderMediaOverlay(true);
         }
 
+        Log.e(TAG, "Small size: " + smallVideoUsers.size());
         mVideoAdapter.updateVideoData(smallVideoUsers);
 
     }

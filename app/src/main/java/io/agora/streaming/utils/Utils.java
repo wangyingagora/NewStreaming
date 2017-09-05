@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.view.View;
+import android.view.ViewManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -85,12 +87,18 @@ public class Utils {
         while (iterator.hasNext()) {
             Map.Entry<Integer, UserInfo> entry = iterator.next();
             UserInfo user = entry.getValue();
-            if (user.uid == bigUserId) {
+            if (user.uid == bigUserId || !user.hasSubscribed) {
                 continue;
             }
 
             users.add(user);
         }
         return users;
+    }
+
+    public static void removeViewFromParent(View view) {
+        if (view.getParent() != null) {
+            ((ViewManager)view.getParent()).removeView(view);
+        }
     }
 }
