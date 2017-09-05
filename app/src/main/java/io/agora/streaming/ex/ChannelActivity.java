@@ -553,7 +553,7 @@ public class ChannelActivity extends AgoraBaseActivity {
 
     private void setTranscoding(CustomTranscoding mTransCoding) {
         if (!mTransCoding.isEnabled) {
-            showToast("Transcoding is disabled");
+            showToast(getString(R.string.custom_transcoding_disabled));
             return;
         }
         ArrayList<LiveTranscoding.TranscodingUser> transcodingUsers = null;
@@ -791,6 +791,10 @@ public class ChannelActivity extends AgoraBaseActivity {
 
     private void addTranscodingUrl(String room) {
         if (TextUtils.isEmpty(room)) {
+            return;
+        }
+        if (!mCustomTranscoding.isEnabled) {
+            showToast(getString(R.string.custom_transcoding_disabled));
             return;
         }
 
