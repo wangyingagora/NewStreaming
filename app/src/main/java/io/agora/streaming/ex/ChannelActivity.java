@@ -363,7 +363,7 @@ public class ChannelActivity extends AgoraBaseActivity {
         mVideoAdapter.setOnVideoViewClickedListener(new VideoAdapter.OnVideoViewClickedListener() {
             @Override
             public void onVideoViewClicked(int uid) {
-
+                doVideoViewClicked(uid);
             }
         });
         mVideoListView.setLayoutManager(gridLayoutManager);
@@ -501,6 +501,20 @@ public class ChannelActivity extends AgoraBaseActivity {
         Log.e(TAG, "total size: " + mUserInfo.size());
 
         return user;
+    }
+
+    private void doVideoViewClicked(int uid) {
+        if (mCustomTranscoding.layout == CustomTranscoding.LAYOUT_DEFAULT) {
+            return;
+        } else if(mCustomTranscoding.layout == CustomTranscoding.LAYOUT_FLOAT){
+            mBigUserId = uid;
+        } else if(mCustomTranscoding.layout == CustomTranscoding.LAYOUT_TITLE){
+            mBigUserId = uid;
+        } else if(mCustomTranscoding.layout == CustomTranscoding.LAYOUT_MATRIX){
+            return;
+        }
+
+        setTranscoding(mCustomTranscoding);
     }
 
     /*
