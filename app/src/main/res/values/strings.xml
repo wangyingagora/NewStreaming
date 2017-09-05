@@ -30,5 +30,5 @@
     <string name="frame_rate_value_with_unit">%d fps</string>
 
 
-    <string name="enable_custom_transcoding"></string>
+    <string name="custom_transcoding_disabled">Transcoding is disabled</string>
 </resources>
